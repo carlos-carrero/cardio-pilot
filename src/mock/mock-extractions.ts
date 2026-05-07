@@ -1,0 +1,157 @@
+import type { CardioExtraction } from "@/types";
+import type { ExampleCaseId } from "@/types";
+
+const base = {
+  model_id: "mock-extractor-v1-stage1",
+  extracted_at: new Date().toISOString(),
+};
+
+const extractionsByCase: Record<ExampleCaseId, CardioExtraction> = {
+  NEEDS_MORE_INFO: {
+    ...base,
+    extraction_id: "ext-needs-more-info",
+    confidence: 0.62,
+    fields: {
+      age: 62,
+      chest_pain_present: true,
+      pain_duration_minutes: null,
+      pain_character: null,
+      pain_severity: null,
+      pain_radiation: null,
+      exertional_chest_pain: null,
+      diaphoresis: null,
+      dyspnea: false,
+      syncope: false,
+      systolic_bp: 124,
+      heart_rate: 80,
+      prior_mi: null,
+      known_cad: null,
+      cv_risk_factors_count: null,
+      current_meds_none: true,
+    },
+    unmapped_signals: [],
+    warnings: [
+      "Pain duration not specified in narrative.",
+      "Pain character not described.",
+      "No mention of radiation pattern.",
+      "CAD and MI history not stated.",
+    ],
+  },
+
+  ROUTINE_REVIEW: {
+    ...base,
+    extraction_id: "ext-routine-review",
+    confidence: 0.94,
+    fields: {
+      age: 60,
+      chest_pain_present: true,
+      pain_duration_minutes: 15,
+      pain_character: "pressure",
+      pain_severity: "low",
+      pain_radiation: "none",
+      exertional_chest_pain: false,
+      diaphoresis: false,
+      dyspnea: false,
+      syncope: false,
+      systolic_bp: 122,
+      heart_rate: 78,
+      prior_mi: null,
+      known_cad: false,
+      cv_risk_factors_count: 1,
+      current_meds_none: true,
+    },
+    unmapped_signals: [],
+    warnings: [],
+  },
+
+  URGENT_ESCALATION: {
+    ...base,
+    extraction_id: "ext-urgent-escalation",
+    confidence: 0.91,
+    fields: {
+      age: 63,
+      chest_pain_present: true,
+      pain_duration_minutes: 20,
+      pain_character: "pressure",
+      pain_severity: "moderate",
+      pain_radiation: "jaw",
+      exertional_chest_pain: true,
+      diaphoresis: false,
+      dyspnea: false,
+      syncope: false,
+      systolic_bp: 126,
+      heart_rate: 88,
+      prior_mi: null,
+      known_cad: false,
+      cv_risk_factors_count: 1,
+      current_meds_none: true,
+    },
+    unmapped_signals: [],
+    warnings: [],
+  },
+
+  EMERGENCY_ROUTE: {
+    ...base,
+    extraction_id: "ext-emergency-route",
+    confidence: 0.88,
+    fields: {
+      age: 64,
+      chest_pain_present: true,
+      pain_duration_minutes: 10,
+      pain_character: "pressure",
+      pain_severity: "high",
+      pain_radiation: "left_arm",
+      exertional_chest_pain: null,
+      diaphoresis: null,
+      dyspnea: false,
+      syncope: true,
+      systolic_bp: 120,
+      heart_rate: 96,
+      prior_mi: null,
+      known_cad: false,
+      cv_risk_factors_count: null,
+      current_meds_none: true,
+    },
+    unmapped_signals: [],
+    warnings: ["Exertional component not mentioned. Left as null."],
+  },
+
+  DEFERRED_PENDING_DATA: {
+    ...base,
+    extraction_id: "ext-deferred-pending",
+    confidence: 0.55,
+    fields: {
+      age: 59,
+      chest_pain_present: false,
+      pain_duration_minutes: 20,
+      pain_character: "crushing",
+      pain_severity: "high",
+      pain_radiation: "jaw",
+      exertional_chest_pain: true,
+      diaphoresis: null,
+      dyspnea: false,
+      syncope: false,
+      systolic_bp: 122,
+      heart_rate: 84,
+      prior_mi: null,
+      known_cad: false,
+      cv_risk_factors_count: null,
+      current_meds_none: true,
+    },
+    unmapped_signals: [
+      "Patient denies chest pain but describes pain attributes — contradiction detected.",
+    ],
+    warnings: [
+      "Chest pain presence contradicts pain description fields.",
+      "Exertional chest pain stated despite no chest pain.",
+      "Low extraction confidence due to contradictory signals.",
+    ],
+  },
+};
+
+export function getMockExtraction(caseId: ExampleCaseId): CardioExtraction {
+  return {
+    ...extractionsByCase[caseId],
+    extracted_at: new Date().toISOString(),
+  };
+}
