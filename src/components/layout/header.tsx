@@ -17,7 +17,7 @@ const NAV_ITEMS: { key: PilotSurface; label: string }[] = [
   { key: "flow", label: "Pilot Flow" },
   { key: "reviewer", label: "Reviewer" },
   { key: "metrics", label: "Metrics" },
-  { key: "cost_impact", label: "Cost Impact" },
+  { key: "cost_impact", label: "Operational Signals" },
   { key: "pilot_summary", label: "Pilot Summary" },
   { key: "qa", label: "QA" },
   { key: "demo_guide", label: "Demo Guide" },
@@ -28,14 +28,17 @@ interface HeaderProps {
   activeSurface: PilotSurface;
   onSurfaceChange: (surface: PilotSurface) => void;
   onLogoClick: () => void;
+  persistedSessionActive?: boolean;
 }
 
 export function Header({
   activeSurface,
   onSurfaceChange,
   onLogoClick,
+  persistedSessionActive = false,
 }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const sessionLabel = persistedSessionActive ? "Persisted demo session · active" : "Current demo session · not persisted";
 
   return (
     <header className="sticky top-0 z-50 border-b border-rule/60 bg-warm-white/90 backdrop-blur-lg">
@@ -72,7 +75,7 @@ export function Header({
           <span className="ml-3 h-3.5 w-px bg-rule/50" />
           <span className="ml-3 flex items-center gap-1.5 font-mono text-eyebrow uppercase text-muted/60">
             <span className="block h-1 w-1 rounded-full bg-accent/50" />
-            Local session
+            {sessionLabel}
           </span>
         </nav>
 
@@ -111,7 +114,7 @@ export function Header({
           <div className="mt-3 border-t border-rule/40 pt-3">
             <span className="flex items-center gap-1.5 font-mono text-eyebrow uppercase text-muted/60">
               <span className="block h-1 w-1 rounded-full bg-accent/50" />
-              Local session
+              {sessionLabel}
             </span>
           </div>
         </div>

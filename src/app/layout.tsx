@@ -4,7 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Soficca Cardio Pilot",
   description:
-    "Physician-reviewed cardiovascular triage infrastructure powered by Soficca.",
+    "Cardiovascular triage infrastructure built for physician review, powered by Soficca.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

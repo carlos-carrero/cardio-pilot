@@ -29,7 +29,7 @@ const EVIDENCE_LOOP = [
   { label: "Structured signals", icon: "◇" },
   { label: "Versioned route", icon: "⬡" },
   { label: "Human review", icon: "○" },
-  { label: "Measured impact", icon: "△" },
+  { label: "Operational signals", icon: "△" },
 ];
 
 interface WelcomeScreenProps {
@@ -56,7 +56,7 @@ export function WelcomeScreen({
             </h1>
 
             <p className="mt-5 max-w-[480px] text-body-lg leading-relaxed text-ink-secondary">
-              Physician-reviewed cardiovascular triage infrastructure.
+              Cardiovascular triage infrastructure built for physician review.
             </p>
 
             <p className="mt-8 max-w-[540px] text-body leading-[1.78] text-muted">

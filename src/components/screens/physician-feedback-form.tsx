@@ -233,7 +233,7 @@ export function PhysicianFeedbackForm({
       {saved && (
         <div className="mt-4 rounded-lg border border-accent/20 bg-accent-soft/50 px-4 py-3">
           <p className="text-body-sm font-medium text-accent">
-            Feedback captured for local session.
+            Feedback captured for current session.
           </p>
         </div>
       )}

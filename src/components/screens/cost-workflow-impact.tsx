@@ -40,7 +40,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
         { label: "Estimated review-time saved", value: metrics.average_estimated_time_saved_label ?? "—" },
         { label: "Cases prepared before consultation", value: `${metrics.cases_reviewed} / ${metrics.cases_sent_to_reviewer}` },
         { label: "Cases with human-corrected extraction", value: `${metrics.ai_intake.cases_with_human_edits} cases` },
-        { label: "Physician agreement rate", value: formatRate(metrics.agreement_rate) },
+        { label: "Reviewer agreement rate", value: formatRate(metrics.agreement_rate) },
       ],
     },
     {
@@ -61,21 +61,20 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
   ];
   return (
     <section className="mx-auto max-w-[1360px] px-6 py-10 lg:py-14">
-      <SectionLabel>Cost & Workflow Impact Signals</SectionLabel>
+      <SectionLabel>Operational Workflow Signals</SectionLabel>
       <h2 className="mt-3 font-sans text-heading-lg font-semibold leading-tight tracking-tighter text-ink">
         Operational indicators for clinical review efficiency
       </h2>
       <p className="mt-3 max-w-[620px] text-body leading-relaxed text-ink-secondary">
-        Operational indicators associated with reduced fragmentation, safer
-        routing, and more efficient clinical review.
+        Operational indicators related to fragmentation, routing safety, and clinical review workflow.
       </p>
 
       {/* Important caveat */}
       <div className="mt-5 rounded-card border border-rule-light/80 bg-surface px-4 py-3">
         <p className="text-body-sm leading-relaxed text-ink-secondary">
           <span className="font-semibold text-ink">Important:</span> This pilot
-          does not claim realized cost reduction. It measures operational signals
-          associated with cost avoidance.
+          does not claim realized cost reduction. It reports operational signals
+          that may inform workflow review.
         </p>
       </div>
 
@@ -98,8 +97,8 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
         <p className="max-w-[640px] text-body leading-relaxed text-ink-secondary">
           Fragmented triage creates repeated intake, delayed escalation,
           unnecessary escalation, weak continuity, and limited auditability.
-          These signals measure whether governed routing reduces operational
-          friction before, during, and after clinical review.
+            These signals indicate where governed routing may reduce operational friction
+            before, during, and after clinical review.
         </p>
       </div>
 
@@ -132,7 +131,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
           {/* Workflow model card */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Illustrative Workflow Model
+              Illustrative Workflow Signal Model
             </p>
             <div className="mt-4 space-y-3">
               <div className="flex justify-between text-body-sm">
@@ -154,8 +153,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
             {/* Formula */}
             <div className="mt-4 rounded-lg border border-rule-light bg-surface p-3">
               <p className="font-mono text-label leading-relaxed text-muted">
-                Estimated workflow time saved =<br />
-                <span className="text-ink-secondary">cases reviewed × estimated minutes saved per case</span>
+                Estimated workflow time signal = cases reviewed × reviewer-reported estimated minutes saved per case
               </p>
             </div>
 
@@ -169,7 +167,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
             <div className="mb-3 flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               <span className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-authority-text/40">
-                Cost-avoidance evidence layer
+                Operational signal evidence layer
               </span>
             </div>
             <div className="space-y-2.5 font-mono text-meta text-authority-text/70">
@@ -194,7 +192,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
 
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Estimated review-time saved distribution
+              Reviewer-reported time-signal distribution
             </p>
             {!hasReviewedCases && (
               <p className="mt-2 text-meta leading-relaxed text-muted">
@@ -246,7 +244,7 @@ export function CostWorkflowImpactDashboard({ metrics }: CostWorkflowImpactDashb
       <div className="mt-10 border-t border-rule-light pt-4">
         <p className="max-w-[560px] text-meta leading-relaxed text-muted">
           Soficca does not diagnose, prescribe, or replace clinical judgment.
-          These local session signals do not claim realized cost reduction, clinical validation, or outcome improvement.
+          These current session signals do not claim realized cost reduction, clinical validation, or outcome improvement.
         </p>
       </div>
     </section>

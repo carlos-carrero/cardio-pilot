@@ -79,11 +79,11 @@ export async function persistCaseBundle(
     }
 
     if (res.status === 503) {
-      return { ok: false, error: "Persistence unavailable — local session retained.", status: "unavailable" };
+      return { ok: false, error: "Persistence unavailable — current session retained in browser.", status: "unavailable" };
     }
 
     if (res.status === 502) {
-      return { ok: false, error: "Backend unavailable — local session retained.", status: "unavailable" };
+      return { ok: false, error: "Backend unavailable — current session retained in browser.", status: "unavailable" };
     }
 
     const errData = await res.json().catch(() => ({}));
@@ -141,11 +141,11 @@ export async function saveReviewerFeedback(
     }
 
     if (res.status === 503) {
-      return { ok: false, error: "Persistence unavailable — feedback retained locally.", status: "unavailable" };
+      return { ok: false, error: "Persistence unavailable — feedback retained in current session.", status: "unavailable" };
     }
 
     if (res.status === 502) {
-      return { ok: false, error: "Backend unavailable — feedback retained locally.", status: "unavailable" };
+      return { ok: false, error: "Backend unavailable — feedback retained in current session.", status: "unavailable" };
     }
 
     const errData = await res.json().catch(() => ({}));

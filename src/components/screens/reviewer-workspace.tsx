@@ -278,7 +278,7 @@ export function ReviewerWorkspace({
             Review routed cases
           </h2>
           <p className="mt-2 max-w-[560px] text-body leading-relaxed text-ink-secondary">
-            Review routed cases, validate the suggested route, and submit structured feedback.
+            Review routed cases, assess the suggested route, and submit structured feedback.
           </p>
 
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
@@ -607,7 +607,7 @@ export function ReviewerWorkspace({
                     <div className="flex justify-between"><span className="text-muted">Engine report</span><span className="font-mono text-ink-secondary">{(persistedBundleDetail as Record<string, unknown>).engine_report ? "Available" : "—"}</span></div>
                   </div>
                 )}
-                <p className="mt-3 text-eyebrow text-muted">Persisted bundle loaded from backend.</p>
+                <p className="mt-3 text-eyebrow text-muted">Persisted bundle loaded from backend. Not counted in current session metrics unless added through the current reviewer queue.</p>
               </div>
             )}
           </div>
@@ -633,7 +633,7 @@ export function ReviewerWorkspace({
               </div>
             </div>
             <p className="mt-3 border-t border-rule-light pt-2 text-eyebrow text-muted">
-              {queue.some((q) => q.persisted) ? "Feedback persisted for saved cases." : "Local queue. Feedback persisted for database-backed cases."}
+              Current session metrics only. Sample cases and separately loaded persisted cases are not counted.
             </p>
           </div>
 

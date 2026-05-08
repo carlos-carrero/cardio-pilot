@@ -283,7 +283,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
               {unconfirmedInputs.length > 0 && (
                 <div className="border-t border-rule-light/50 pt-3">
                   <p className="mb-2 font-mono text-eyebrow font-medium uppercase text-muted">
-                    Unconfirmed / missing inputs
+                    Unconfirmed routing inputs
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {unconfirmedInputs.map((inp) => (
@@ -318,13 +318,13 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
           {hasIntakeNotes && (
             <CardPanel>
               <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-                Intake completion notes
+                Routing inputs checked
               </h3>
               <div className="space-y-3">
                 {missingInfo?.required_for_routing && missingInfo.required_for_routing.length > 0 && (
                   <div>
                     <p className="mb-1.5 font-mono text-eyebrow font-medium uppercase text-emergency/70">
-                      Required for routing
+                      Required routing fields
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {missingInfo.required_for_routing.map((f) => (
@@ -338,7 +338,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                 {missingInfo?.clinically_useful && missingInfo.clinically_useful.length > 0 && (
                   <div>
                     <p className="mb-1.5 font-mono text-eyebrow font-medium uppercase text-urgent/70">
-                      Clinically useful
+                      Optional clinical context
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {missingInfo.clinically_useful.map((f) => (
@@ -352,7 +352,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                 {missingInfo?.unconfirmed && missingInfo.unconfirmed.length > 0 && (
                   <div>
                     <p className="mb-1.5 font-mono text-eyebrow font-medium uppercase text-muted">
-                      Unconfirmed
+                      Unconfirmed extracted fields
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {missingInfo.unconfirmed.map((f) => (
@@ -395,7 +395,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
             )}
           >
             <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Safety Verification
+              Safety override check
             </h3>
             <div className="grid gap-3 text-body-sm sm:grid-cols-2">
               <div className="flex justify-between sm:flex-col sm:gap-0.5">
@@ -405,7 +405,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                 </span>
               </div>
               <div className="flex justify-between sm:flex-col sm:gap-0.5">
-                <span className="text-muted">Action</span>
+                <span className="text-muted">Safety action</span>
                 <span className="font-mono text-ink-secondary">{s.action}</span>
               </div>
               <div className="flex justify-between sm:flex-col sm:gap-0.5">
@@ -415,7 +415,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                 </span>
               </div>
               <div className="flex justify-between sm:flex-col sm:gap-0.5">
-                <span className="text-muted">Override applied</span>
+                <span className="text-muted">Safety override applied</span>
                 <span className={cn("font-mono", s.override_applied ? "font-medium text-emergency" : "text-ink-secondary")}>
                   {s.override_applied ? "Yes" : "No"}
                 </span>
@@ -441,7 +441,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
           {d.missing_fields.length > 0 && (
             <CardPanel className="border-l-[3px] border-l-urgent/60">
               <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-                Missing Information
+                Missing required routing fields
               </h3>
               <div className="flex flex-wrap gap-2">
                 {d.missing_fields.map((fl) => (
@@ -539,9 +539,9 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                 </span>
               </div>
               <div className="space-y-3">
-                <TraceRow label="Preliminary route" value={t.preliminary_route} />
-                <TraceRow label="Final route" value={t.final_route} />
-                <TraceRow label="Override reason" value={t.override_reason} />
+                <TraceRow label="Preliminary routing rule evaluated" value={t.preliminary_route} />
+                <TraceRow label="Final route after safety policy" value={t.final_route} />
+                <TraceRow label="Safety override reason" value={t.override_reason} />
                 <TraceRow
                   label="Activated rules"
                   value={t.activated_rules.length > 0 ? t.activated_rules.join(", ") : "None"}
@@ -919,7 +919,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
                     ? "border-routine/30 bg-routine/10 text-routine"
                     : "border-rule bg-surface text-muted"
                 )}>
-                  {persistStatus === "saved" ? "Persisted" : "Local session"}
+                  {persistStatus === "saved" ? "Persisted" : "Current session"}
                 </span>
               </div>
               <div className="flex justify-between">

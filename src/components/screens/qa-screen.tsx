@@ -119,6 +119,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
               const st = getState(s.id);
               const total = s.checklist.length;
               const passCount = s.checklist.filter((c) => st.results[c.id] === "pass").length;
+              const checkedCount = s.checklist.filter((c) => st.results[c.id] === "pass" || st.results[c.id] === "fail").length;
               const hasFail = s.checklist.some((c) => st.results[c.id] === "fail");
               return (
                 <button
@@ -133,7 +134,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
                 >
                   <span className="block text-body-sm font-semibold text-ink">{s.label}</span>
                   <span className="mt-0.5 block font-mono text-eyebrow text-muted">
-                    {passCount}/{total} passed
+                    {checkedCount === 0 ? "Not run" : `${checkedCount}/${total} checked · ${passCount} passed`}
                     {hasFail && <span className="ml-1 text-emergency">· has failures</span>}
                   </span>
                 </button>

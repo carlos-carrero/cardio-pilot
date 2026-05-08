@@ -85,7 +85,7 @@ export function buildSessionSummary(
       physician_review_required: true,
     },
     disclaimers: [
-      "This is a local demo-session summary. Persisted session summaries are available via the Metrics Dashboard.",
+      "This is a current demo-session summary. Persisted session summaries are available via the Metrics Dashboard.",
       "This summary does not claim clinical validation, clinical outcome improvement, or realized cost reduction.",
       "Soficca does not diagnose, prescribe, or replace clinical judgment.",
       "AI structures the signal. Human confirms or corrects. Soficca governs the route. Physicians make the final decision.",
@@ -99,18 +99,18 @@ export function buildSessionSummaryMarkdown(summary: CardioPilotSessionSummary):
   const m = summary.metrics;
 
   push(
-    "# Soficca Cardio Pilot — Local Session Summary",
+    "# Soficca Cardio Pilot — Current Demo Session Summary",
     "",
     "## Session",
     `- **Session ID:** ${summary.session_id}`,
     `- **Exported:** ${summary.exported_at}`,
-    "- **Scope:** Local session only",
+    "- **Scope:** Current demo session",
     `- **Pilot mode:** ${summary.pilot_mode}`,
   );
 
   push(
     "## Important disclaimer",
-    "This is a local demo-session summary. It does not claim clinical validation, clinical outcome improvement, or realized cost reduction. Soficca does not diagnose, prescribe, or replace clinical judgment.",
+    "This is a current demo-session summary. It does not claim clinical validation, clinical outcome improvement, or realized cost reduction. Soficca does not diagnose, prescribe, or replace clinical judgment.",
   );
 
   push(
@@ -191,7 +191,7 @@ export function buildSessionSummaryMarkdown(summary: CardioPilotSessionSummary):
 
   push("## Case summaries");
   if (summary.case_summaries.length === 0) {
-    push("No completed cases in this local session.");
+    push("No completed cases in this current demo session.");
   } else {
     for (const c of summary.case_summaries) {
       push(
@@ -213,7 +213,7 @@ export function buildSessionSummaryMarkdown(summary: CardioPilotSessionSummary):
 
   push(
     "## Next recommended step",
-    "Local session complete. Next step: database persistence or controlled physician pilot.",
+    "Current demo session complete. Next step: database persistence or controlled physician pilot.",
     "",
     "---",
     "",

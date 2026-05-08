@@ -357,7 +357,7 @@ export function ExtractionPreviewScreen({
             missingInfo.unconfirmed.length > 0
           ) && (
             <CardPanel className="mt-4 p-5">
-              <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">Missing information</h3>
+              <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">Routing input requirements</h3>
               <div className="space-y-3">
                 {missingInfo!.required_for_routing.length > 0 && (
                   <div>

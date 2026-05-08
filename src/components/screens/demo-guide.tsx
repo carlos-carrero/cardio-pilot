@@ -47,7 +47,7 @@ const CHECKLIST: CheckItem[] = [
   { id: "af_persist_feedback", label: "Persist reviewer feedback", phase: "after" },
   { id: "af_persist_summary", label: "Save session summary to backend", phase: "after" },
   { id: "af_persist_load", label: "Load persisted summary / cases", phase: "after" },
-  { id: "af_reset", label: "Reset local session if needed", phase: "after" },
+  { id: "af_reset", label: "Reset current demo session if needed", phase: "after" },
 ];
 
 const PHASE_LABELS: Record<CheckPhase, string> = {
@@ -152,7 +152,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
                 "Show final report, signal chain, human correction status, and audit trace.",
                 "Send case to Reviewer.",
                 "Submit reviewer feedback.",
-                "Open Metrics and show local session metrics.",
+                "Open Metrics and show current session metrics.",
                 "Export session summary or case audit record.",
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
@@ -328,7 +328,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
                   : "border-rule bg-paper text-muted hover:border-accent hover:text-accent",
               )}
             >
-              {resetConfirm ? "Confirm reset — clears all local session data" : "Reset local demo session"}
+              {resetConfirm ? "Confirm reset — clears all current session data" : "Reset current demo session"}
             </button>
             {resetConfirm && (
               <button
