@@ -173,9 +173,9 @@ export function PilotMetricsDashboard({
       </h2>
 
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-muted/50" />
+        <span className="h-1.5 w-1.5 rounded-full bg-routine" />
         <span className="font-mono text-label text-muted">
-          Local session metrics · not persisted
+          Local session metrics · persisted summaries available
         </span>
       </div>
 
@@ -200,7 +200,7 @@ export function PilotMetricsDashboard({
               Exports the current local session summary: processed cases, reviewer feedback, metrics, workflow signals, and governance assertions.
             </p>
             <p className="mt-1 font-mono text-eyebrow text-muted">
-              Local export only. No session data is persisted in Stage 2B.8.
+              Local export. Persisted session summaries available via the Persisted Pilot Session card below.
             </p>
             {!hasCases && (
               <p className="mt-2 text-meta text-muted">

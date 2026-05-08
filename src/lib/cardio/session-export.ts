@@ -85,7 +85,7 @@ export function buildSessionSummary(
       physician_review_required: true,
     },
     disclaimers: [
-      "This is a local demo-session summary. It is not persisted.",
+      "This is a local demo-session summary. Persisted session summaries are available via the Metrics Dashboard.",
       "This summary does not claim clinical validation, clinical outcome improvement, or realized cost reduction.",
       "Soficca does not diagnose, prescribe, or replace clinical judgment.",
       "AI structures the signal. Human confirms or corrects. Soficca governs the route. Physicians make the final decision.",

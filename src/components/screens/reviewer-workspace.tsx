@@ -284,7 +284,7 @@ export function ReviewerWorkspace({
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
             <span className={cn("h-1.5 w-1.5 rounded-full", queue.some((q) => q.persisted) ? "bg-routine" : "bg-muted/50")} />
             <span className="font-mono text-label text-muted">
-              {queue.some((q) => q.persisted) ? "Some cases are persistence-backed. Feedback will be saved to database." : "Local reviewer session only. Not persisted to backend."}
+              {queue.some((q) => q.persisted) ? "Reviewer feedback is persisted for saved cases." : "Local reviewer queue. Feedback is persisted for database-backed cases."}
             </span>
           </div>
 
@@ -633,7 +633,7 @@ export function ReviewerWorkspace({
               </div>
             </div>
             <p className="mt-3 border-t border-rule-light pt-2 text-eyebrow text-muted">
-              {queue.some((q) => q.persisted) ? "Some cases are persistence-backed." : "Local reviewer session only."}
+              {queue.some((q) => q.persisted) ? "Feedback persisted for saved cases." : "Local queue. Feedback persisted for database-backed cases."}
             </p>
           </div>
 

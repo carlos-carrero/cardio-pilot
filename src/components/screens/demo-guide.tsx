@@ -19,9 +19,10 @@ interface CheckItem {
 
 const CHECKLIST: CheckItem[] = [
   // Before
-  { id: "be_backend", label: "Backend running on port 8000", phase: "before" },
-  { id: "be_frontend", label: "Frontend running on port 3001", phase: "before" },
+  { id: "be_backend", label: "Backend running (local port 8000 or deployed URL)", phase: "before" },
+  { id: "be_frontend", label: "Frontend running (local or Vercel)", phase: "before" },
   { id: "be_openai", label: "OPENAI_API_KEY configured in backend environment", phase: "before" },
+  { id: "be_db", label: "DATABASE_URL configured on backend (for persistence)", phase: "before" },
   { id: "be_ai_extraction", label: "Real AI extraction working", phase: "before" },
   { id: "be_backend_routing", label: "Real deterministic backend routing working", phase: "before" },
   { id: "be_reviewer_empty", label: "Reviewer queue empty or reset", phase: "before" },
@@ -102,7 +103,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" />
         <span className="font-mono text-label text-muted">
-          Local demo session · persistence available via Metrics Dashboard
+          Local-first demo · Real AI extraction · Real routing · Database persistence available
         </span>
       </div>
 
@@ -269,9 +270,9 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
               <StatusRow label="Data mode" value="Local / session only" />
               <StatusRow label="AI extraction" value="Real backend AI · fallback available" />
               <StatusRow label="Routing" value="Real deterministic backend · fallback available" />
-              <StatusRow label="Reviewer queue" value="Local only" />
-              <StatusRow label="Metrics" value="Local session only" />
-              <StatusRow label="Persistence" value="Not enabled" />
+              <StatusRow label="Reviewer queue" value="Local · feedback persisted for saved cases" />
+              <StatusRow label="Metrics" value="Local-derived · persisted summaries available" />
+              <StatusRow label="Persistence" value="Cases, feedback, sessions, summaries" />
               <StatusRow label="Clinical claims" value="Not validated" />
             </div>
           </div>

@@ -12,9 +12,10 @@ const SECTIONS: { title: string; items: string[] }[] = [
       "Human-confirmed structured input before routing.",
       "Deterministic Soficca routing with safety policy enforcement.",
       "Physician-reviewable governed report with audit trace.",
-      "Local reviewer feedback loop with structured agreement capture.",
-      "Local session metrics reflecting cases, routes, and reviewer signals.",
+      "Reviewer feedback loop with structured agreement capture and database persistence for saved cases.",
+      "Session metrics reflecting cases, routes, and reviewer signals with optional persisted summaries.",
       "Audit export (JSON and Markdown) for individual cases and full sessions.",
+      "Database persistence for saved cases, reviewer feedback, and session summaries.",
     ],
   },
   {
@@ -56,13 +57,14 @@ const READINESS_ITEMS: { label: string; status: "ready" | "next" | "scope" }[] =
   { label: "Real deterministic backend routing", status: "ready" },
   { label: "Structured extraction schema", status: "ready" },
   { label: "Audit trace generation", status: "ready" },
-  { label: "Reviewer feedback workflow (local)", status: "ready" },
-  { label: "Session metrics dashboard (local)", status: "ready" },
+  { label: "Reviewer feedback workflow", status: "ready" },
+  { label: "Database persistence (cases, feedback, summaries)", status: "ready" },
+  { label: "Persisted reviewer feedback", status: "ready" },
+  { label: "Persisted session summaries", status: "ready" },
+  { label: "Session metrics dashboard (local-derived)", status: "ready" },
   { label: "Session and case audit export", status: "ready" },
   { label: "Demo guide and scenario shortcuts", status: "ready" },
-  { label: "Database persistence", status: "next" },
   { label: "Controlled physician pilot", status: "next" },
-  { label: "Real reviewer records (persisted)", status: "next" },
   { label: "Aggregated metrics across sessions", status: "next" },
   { label: "Authentication / access control", status: "next" },
   { label: "Multi-site deployment", status: "scope" },
@@ -94,7 +96,7 @@ export function PilotSummary() {
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
         <span className="h-1.5 w-1.5 rounded-full bg-routine" />
         <span className="font-mono text-label text-muted">
-          Local demo pilot · Real AI extraction · Real deterministic routing · No database persistence yet
+          Local-first pilot · Real AI extraction · Real deterministic routing · Database persistence available for saved cases, reviewer feedback, and session summaries
         </span>
       </div>
 
@@ -125,11 +127,12 @@ export function PilotSummary() {
           </h3>
           <ul className="space-y-2">
             {[
-              "Local demo / pilot shell with real backend services.",
+              "Local-first pilot with real backend services.",
               "Real AI extraction via OpenAI backend.",
               "Real deterministic Soficca routing engine.",
-              "Local-only reviewer workflow and session metrics.",
-              "No database persistence — session resets on reload.",
+              "Reviewer workflow with database persistence for saved cases.",
+              "Session summaries can be persisted and loaded.",
+              "Local queue and metrics reset on reload — persisted data remains in database.",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
                 <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-routine" />
@@ -144,10 +147,10 @@ export function PilotSummary() {
           </h3>
           <ul className="space-y-2">
             {[
-              "Database persistence for cases, feedback, and metrics.",
-              "Controlled physician pilot with real reviewer records.",
+              "Controlled physician pilot with expanded reviewer pool.",
               "Aggregated metrics across sessions and reviewers.",
               "Authentication and access control.",
+              "Session restoration on page reload.",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
                 <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-urgent" />

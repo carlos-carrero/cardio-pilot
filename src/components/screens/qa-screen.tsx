@@ -267,7 +267,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
               </div>
             </div>
             <p className="mt-3 border-t border-rule-light pt-2 text-eyebrow text-muted">
-              Local QA session only. Not persisted.
+              Manual QA session only. Scenario checklist results remain local and are not persisted.
             </p>
           </div>
 
