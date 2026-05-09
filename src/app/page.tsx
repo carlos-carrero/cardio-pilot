@@ -14,7 +14,7 @@ import { QaScreen } from "@/components/screens/qa-screen";
 import { DemoGuide } from "@/components/screens/demo-guide";
 import { extractFromNarrative } from "@/lib/cardio/mock-extractor";
 import { routeExtraction } from "@/lib/cardio/mock-router";
-import { callPilotReport, callPilotExtract } from "@/lib/cardio/api-client";
+import { callPilotReport, callPilotExtract, type ExtractionErrorType } from "@/lib/cardio/api-client";
 import { generateCaseId } from "@/lib/cardio/report-helpers";
 import { addCaseToQueue, isCaseInQueue } from "@/lib/cardio/reviewer-queue";
 import { getSessionMetrics, upsertCompletedCase } from "@/lib/cardio/session-metrics";
@@ -42,6 +42,8 @@ export default function CardioPilotPage() {
   const [pilotCase, setPilotCase] = useState<PilotCase | null>(null);
   const [routingError, setRoutingError] = useState<string | null>(null);
   const [extractionError, setExtractionError] = useState<string | null>(null);
+  const [extractionErrorType, setExtractionErrorType] = useState<ExtractionErrorType | null>(null);
+  const [extractionDiag, setExtractionDiag] = useState<{ elapsedMs?: number; retried?: boolean; requestId?: string } | null>(null);
   const [humanCorrection, setHumanCorrection] = useState<HumanCorrectionStatus | null>(null);
   const [reviewerQueue, setReviewerQueue] = useState<ReviewerQueueItem[]>([]);
   const [completedCases, setCompletedCases] = useState<PilotCase[]>([]);
@@ -59,6 +61,8 @@ export default function CardioPilotPage() {
     setPilotCase(null);
     setRoutingError(null);
     setExtractionError(null);
+    setExtractionErrorType(null);
+    setExtractionDiag(null);
     setHumanCorrection(null);
   }
 
@@ -105,6 +109,8 @@ export default function CardioPilotPage() {
   async function runExtraction(text: string, selectedExample: ExampleCaseId | null) {
     setFlowPhase("extracting");
     setExtractionError(null);
+    setExtractionErrorType(null);
+    setExtractionDiag(null);
 
     const result = await callPilotExtract(text);
 
@@ -136,8 +142,20 @@ export default function CardioPilotPage() {
       mockExt.extraction_source = "mock";
       setExtraction(mockExt);
       setExtractionError(result.error);
+      setExtractionErrorType(result.errorType);
+      setExtractionDiag({
+        elapsedMs: result.elapsedMs,
+        retried: result.retried,
+        requestId: result.requestId,
+      });
       setFlowPhase("extraction");
     }
+  }
+
+  /** Retry live AI extraction using the current narrative. */
+  function handleRetryExtraction() {
+    if (!narrative) return;
+    void runExtraction(narrative, exampleCaseId);
   }
 
   /**
@@ -315,9 +333,28 @@ export default function CardioPilotPage() {
                   <div className="mx-auto max-w-6xl px-6 pt-6">
                     <div className="rounded-lg border border-urgent/30 bg-urgent-soft/60 px-4 py-3">
                       <p className="text-body-sm text-urgent">
-                        <span className="font-semibold">AI extraction unavailable</span> — showing mock extraction fallback.
+                        <span className="font-semibold">
+                          {extractionErrorType === "timeout"
+                            ? "Live AI extraction timed out"
+                            : extractionErrorType === "network" || extractionErrorType === "backend_unavailable"
+                              ? "Live AI extraction unavailable"
+                              : "Live AI extraction failed"}
+                        </span>
+                        {" — showing mock fallback."}
                       </p>
-                      <p className="mt-1 font-mono text-caption text-muted">{extractionError}</p>
+                      <p className="mt-1 font-mono text-caption text-muted">
+                        {extractionError}
+                        {extractionDiag?.elapsedMs != null && ` · ${(extractionDiag.elapsedMs / 1000).toFixed(1)}s`}
+                        {extractionDiag?.retried && " · retried"}
+                        {extractionDiag?.requestId && ` · ${extractionDiag.requestId}`}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleRetryExtraction}
+                        className="mt-2 rounded border border-urgent/40 bg-white px-3 py-1 font-mono text-caption text-urgent transition-colors hover:bg-urgent-soft/40"
+                      >
+                        Retry live extraction
+                      </button>
                     </div>
                   </div>
                 )}
