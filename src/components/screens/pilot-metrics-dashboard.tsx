@@ -4,6 +4,8 @@ import { useState } from "react";
 import { SectionLabel } from "@/components/ui/section-label";
 import { CardPanel } from "@/components/ui/card-panel";
 import { cn } from "@/lib/cn";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 import {
   buildSessionSummary,
   downloadSessionSummaryJson,
@@ -49,6 +51,7 @@ export function PilotMetricsDashboard({
   persistedSessionId, persistedSessionStatus, persistedSessionLabel, persistedSessionError,
   onSetPersistedSessionId, onSetPersistedSessionStatus, onSetPersistedSessionLabel, onSetPersistedSessionError,
 }: PilotMetricsDashboardProps) {
+  const { t } = useTranslation();
   const [summarySaveStatus, setSummarySaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [summarySaveError, setSummarySaveError] = useState<string | null>(null);
   const [summaryLoadStatus, setSummaryLoadStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
@@ -76,7 +79,7 @@ export function PilotMetricsDashboard({
       }
     } catch {
       onSetPersistedSessionStatus("error");
-      onSetPersistedSessionError("Unexpected error creating session.");
+      onSetPersistedSessionError(t("metrics.error_create_session"));
     }
   }
 
@@ -91,7 +94,7 @@ export function PilotMetricsDashboard({
       if (!result.ok) setSummarySaveError(result.error);
     } catch {
       setSummarySaveStatus("error");
-      setSummarySaveError("Unexpected error saving session summary.");
+      setSummarySaveError(t("metrics.error_save_summary"));
     }
   }
 
@@ -111,48 +114,48 @@ export function PilotMetricsDashboard({
       }
     } catch {
       setSummaryLoadStatus("error");
-      setSummaryLoadError("Unexpected error loading session summary.");
+      setSummaryLoadError(t("metrics.error_load_summary"));
     }
   }
 
   const hasCases = metrics.cases_processed > 0;
-  const summaryMetrics = [
-    { label: "Cases processed", value: String(metrics.cases_processed), accent: "accent" },
-    { label: "Sent to reviewer", value: String(metrics.cases_sent_to_reviewer), accent: "accent" },
-    { label: "Reviewed", value: String(metrics.cases_reviewed), accent: "routine" },
-    { label: "Pending review", value: String(metrics.pending_review), accent: metrics.pending_review > 0 ? "urgent" : "muted" },
-    { label: "Agreement rate", value: formatRate(metrics.agreement_rate), accent: metrics.agreement_rate === null ? "muted" : "routine", note: metrics.cases_reviewed === 0 ? "Populates after review" : undefined },
-    { label: "Average usefulness", value: formatScore(metrics.average_usefulness_score), accent: metrics.average_usefulness_score === null ? "muted" : "accent" },
-    { label: "Estimated review-time saved", value: metrics.average_estimated_time_saved_label ?? "—", accent: "info", note: "Reviewer-reported signal" },
-    { label: "Audit exports available", value: String(metrics.audit_exports_available), accent: "routine", note: "Availability, not downloads" },
-    { label: "Autonomous diagnosis events", value: String(metrics.governance.autonomous_diagnosis_events), accent: "muted", note: "Soficca never diagnoses" },
-    { label: "Autonomous prescription events", value: String(metrics.governance.autonomous_prescription_events), accent: "muted", note: "Soficca never prescribes" },
+  const summaryMetrics: { labelKey: TranslationKey; value: string; accent: string; noteKey?: TranslationKey }[] = [
+    { labelKey: "metrics.cases_processed", value: String(metrics.cases_processed), accent: "accent" },
+    { labelKey: "metrics.sent_to_reviewer", value: String(metrics.cases_sent_to_reviewer), accent: "accent" },
+    { labelKey: "metrics.reviewed", value: String(metrics.cases_reviewed), accent: "routine" },
+    { labelKey: "metrics.pending_review", value: String(metrics.pending_review), accent: metrics.pending_review > 0 ? "urgent" : "muted" },
+    { labelKey: "metrics.agreement_rate", value: formatRate(metrics.agreement_rate), accent: metrics.agreement_rate === null ? "muted" : "routine", noteKey: metrics.cases_reviewed === 0 ? "metrics.note_populates" : undefined },
+    { labelKey: "metrics.avg_usefulness", value: formatScore(metrics.average_usefulness_score), accent: metrics.average_usefulness_score === null ? "muted" : "accent" },
+    { labelKey: "metrics.est_time_saved", value: metrics.average_estimated_time_saved_label ?? "—", accent: "info", noteKey: "metrics.note_reviewer_signal" },
+    { labelKey: "metrics.audit_exports", value: String(metrics.audit_exports_available), accent: "routine", noteKey: "metrics.note_availability" },
+    { labelKey: "metrics.autonomous_dx", value: String(metrics.governance.autonomous_diagnosis_events), accent: "muted", noteKey: "metrics.note_never_dx" },
+    { labelKey: "metrics.autonomous_rx", value: String(metrics.governance.autonomous_prescription_events), accent: "muted", noteKey: "metrics.note_never_rx" },
   ];
   const totalRoutes = Math.max(metrics.cases_processed, 1);
-  const routeDistribution = [
-    { route: "Emergency", count: metrics.emergency_routes, total: totalRoutes, color: "bg-emergency" },
-    { route: "Same-day urgent", count: metrics.urgent_routes, total: totalRoutes, color: "bg-urgent" },
-    { route: "Routine review", count: metrics.routine_routes, total: totalRoutes, color: "bg-routine" },
-    { route: "Needs more info", count: metrics.needs_more_info_routes, total: totalRoutes, color: "bg-info" },
-    { route: "Conflict", count: metrics.conflict_routes, total: totalRoutes, color: "bg-deferred" },
+  const routeDistribution: { routeKey: TranslationKey; count: number; total: number; color: string }[] = [
+    { routeKey: "metrics.route_emergency", count: metrics.emergency_routes, total: totalRoutes, color: "bg-emergency" },
+    { routeKey: "metrics.route_urgent", count: metrics.urgent_routes, total: totalRoutes, color: "bg-urgent" },
+    { routeKey: "metrics.route_routine", count: metrics.routine_routes, total: totalRoutes, color: "bg-routine" },
+    { routeKey: "metrics.route_needs_info", count: metrics.needs_more_info_routes, total: totalRoutes, color: "bg-info" },
+    { routeKey: "metrics.route_conflict", count: metrics.conflict_routes, total: totalRoutes, color: "bg-deferred" },
   ];
-  const aiIntakeMetrics = [
-    { label: "Real AI extractions", value: String(metrics.ai_intake.real_ai_extractions) },
-    { label: "Mock extraction fallbacks", value: String(metrics.ai_intake.mock_extraction_fallbacks) },
-    { label: "Human-corrected cases", value: String(metrics.ai_intake.cases_with_human_edits) },
-    { label: "Edited fields", value: String(metrics.ai_intake.total_human_edited_fields) },
-    { label: "Missing info surfaced", value: String(metrics.ai_intake.cases_with_missing_information) },
-    { label: "Completion questions generated", value: String(metrics.ai_intake.cases_with_completion_questions) },
-    { label: "Cases with quality flags", value: String(metrics.ai_intake.cases_with_quality_flags) },
-    { label: "Cases with PII warnings", value: String(metrics.ai_intake.cases_with_pii_warnings) },
+  const aiIntakeMetrics: { labelKey: TranslationKey; value: string }[] = [
+    { labelKey: "metrics.ai_real", value: String(metrics.ai_intake.real_ai_extractions) },
+    { labelKey: "metrics.ai_mock", value: String(metrics.ai_intake.mock_extraction_fallbacks) },
+    { labelKey: "metrics.ai_human_corrected", value: String(metrics.ai_intake.cases_with_human_edits) },
+    { labelKey: "metrics.ai_edited_fields", value: String(metrics.ai_intake.total_human_edited_fields) },
+    { labelKey: "metrics.ai_missing_info", value: String(metrics.ai_intake.cases_with_missing_information) },
+    { labelKey: "metrics.ai_completion_qs", value: String(metrics.ai_intake.cases_with_completion_questions) },
+    { labelKey: "metrics.ai_quality_flags", value: String(metrics.ai_intake.cases_with_quality_flags) },
+    { labelKey: "metrics.ai_pii_warnings", value: String(metrics.ai_intake.cases_with_pii_warnings) },
   ];
-  const safetyAuditMetrics = [
-    { label: "Reports with trace", value: `${metrics.governance.reports_with_trace} / ${metrics.cases_processed}` },
-    { label: "Reports with policy version", value: `${metrics.governance.reports_with_policy_version} / ${metrics.cases_processed}` },
-    { label: "Reports with ruleset version", value: `${metrics.governance.reports_with_ruleset_version} / ${metrics.cases_processed}` },
-    { label: "Reports with engine version", value: `${metrics.governance.reports_with_engine_version} / ${metrics.cases_processed}` },
-    { label: "Reports with activated rules", value: `${metrics.governance.reports_with_activated_rules} / ${metrics.cases_processed}` },
-    { label: "AI route decisions", value: String(metrics.governance.ai_route_decisions) },
+  const safetyAuditMetrics: { labelKey: TranslationKey; value: string }[] = [
+    { labelKey: "metrics.safety_trace", value: `${metrics.governance.reports_with_trace} / ${metrics.cases_processed}` },
+    { labelKey: "metrics.safety_policy", value: `${metrics.governance.reports_with_policy_version} / ${metrics.cases_processed}` },
+    { labelKey: "metrics.safety_ruleset", value: `${metrics.governance.reports_with_ruleset_version} / ${metrics.cases_processed}` },
+    { labelKey: "metrics.safety_engine", value: `${metrics.governance.reports_with_engine_version} / ${metrics.cases_processed}` },
+    { labelKey: "metrics.safety_rules", value: `${metrics.governance.reports_with_activated_rules} / ${metrics.cases_processed}` },
+    { labelKey: "metrics.safety_ai_decisions", value: String(metrics.governance.ai_route_decisions) },
   ];
 
   function handleExportSessionJson() {
@@ -167,25 +170,25 @@ export function PilotMetricsDashboard({
 
   return (
     <section className="mx-auto max-w-[1360px] px-6 py-10 lg:py-14">
-      <SectionLabel>Pilot Metrics Dashboard</SectionLabel>
+      <SectionLabel>{t("metrics.section_label")}</SectionLabel>
       <h2 className="mt-3 font-sans text-heading-lg font-semibold leading-tight tracking-tighter text-ink">
-        Aggregate signals from routed cases and reviewer feedback
+        {t("metrics.heading")}
       </h2>
 
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
         <span className="h-1.5 w-1.5 rounded-full bg-routine" />
         <span className="font-mono text-label text-muted">
-          Current demo session metrics · persisted summaries available
+          {t("metrics.banner")}
         </span>
       </div>
 
       {!hasCases && (
         <div className="mt-6 rounded-card border border-rule-light bg-warm-white shadow-card p-6">
           <p className="text-body font-medium text-ink-secondary">
-            No completed cases yet. Run a pilot case to populate current session metrics.
+            {t("metrics.empty_heading")}
           </p>
           <p className="mt-1 text-caption text-muted">
-            Audit export availability is based on completed cases with reports.
+            {t("metrics.empty_hint")}
           </p>
         </div>
       )}
@@ -194,17 +197,17 @@ export function PilotMetricsDashboard({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Session export
+              {t("metrics.export_heading")}
             </h3>
             <p className="mt-2 max-w-[620px] text-body-sm leading-relaxed text-ink-secondary">
-              Exports the current demo session summary: processed cases, reviewer feedback, metrics, workflow signals, and governance assertions.
+              {t("metrics.export_desc")}
             </p>
             <p className="mt-1 font-mono text-eyebrow text-muted">
-              Session export. Persisted session summaries available via the Persisted Pilot Session card below.
+              {t("metrics.export_hint")}
             </p>
             {!hasCases && (
               <p className="mt-2 text-meta text-muted">
-                Run at least one completed case to export a session summary.
+                {t("metrics.export_no_cases")}
               </p>
             )}
           </div>
@@ -220,7 +223,7 @@ export function PilotMetricsDashboard({
                   : "cursor-not-allowed border-rule-light bg-surface text-muted/60"
               )}
             >
-              Export Session JSON
+              {t("metrics.export_json")}
             </button>
             <button
               type="button"
@@ -233,7 +236,7 @@ export function PilotMetricsDashboard({
                   : "cursor-not-allowed border-rule-light bg-surface text-muted/60"
               )}
             >
-              Export Session Markdown
+              {t("metrics.export_md")}
             </button>
           </div>
         </div>
@@ -243,17 +246,17 @@ export function PilotMetricsDashboard({
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {summaryMetrics.map((m) => (
           <div
-            key={m.label}
+            key={m.labelKey}
             className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-4"
           >
             <p className="font-mono text-eyebrow font-medium uppercase text-muted">
-              {m.label}
+              {t(m.labelKey)}
             </p>
             <p className={cn("mt-2 font-sans text-display font-bold leading-none tracking-tight", ACCENT_COLORS[m.accent])}>
               {m.value}
             </p>
-            {m.note && (
-              <p className="mt-1.5 font-mono text-eyebrow text-muted/70">{m.note}</p>
+            {m.noteKey && (
+              <p className="mt-1.5 font-mono text-eyebrow text-muted/70">{t(m.noteKey)}</p>
             )}
           </div>
         ))}
@@ -262,7 +265,7 @@ export function PilotMetricsDashboard({
       {metrics.cases_sent_to_reviewer > 0 && metrics.cases_reviewed === 0 && (
         <div className="mt-4 rounded-lg border border-rule-light bg-surface px-4 py-3">
           <p className="text-body-sm text-muted">
-            Reviewer metrics will populate after cases are reviewed.
+            {t("metrics.reviewer_hint")}
           </p>
         </div>
       )}
@@ -270,37 +273,23 @@ export function PilotMetricsDashboard({
       {/* What these metrics mean */}
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          What These Metrics Mean
+          {t("metrics.what_heading")}
         </h3>
         <p className="mt-3 max-w-[640px] text-body leading-relaxed text-ink-secondary">
-          The pilot measures whether Soficca consistently surfaces missing
-          information, blocks unsafe classification, preserves traceability,
-          and remains structured for human review.
+          {t("metrics.what_desc")}
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {[
-            {
-              title: "Safety coverage",
-              body: "Percentage of cases where safety policies were evaluated and, when triggered, correctly overrode the preliminary route.",
-            },
-            {
-              title: "Review alignment",
-              body: "How often reviewers agree with the Soficca-suggested route. Higher alignment indicates routing coherence, not diagnostic accuracy.",
-            },
-            {
-              title: "Intake quality",
-              body: "The proportion of cases where all required clinical fields were present. Higher intake quality means fewer deferrals and better routing confidence.",
-            },
-            {
-              title: "Operational readiness",
-              body: "Whether every report includes engine version, ruleset version, safety policy version, and activated rules — the minimum for institutional auditability.",
-            },
-          ].map((card) => (
-            <CardPanel key={card.title}>
+          {([
+            { titleKey: "metrics.card_safety_title" as TranslationKey, bodyKey: "metrics.card_safety_body" as TranslationKey },
+            { titleKey: "metrics.card_alignment_title" as TranslationKey, bodyKey: "metrics.card_alignment_body" as TranslationKey },
+            { titleKey: "metrics.card_intake_title" as TranslationKey, bodyKey: "metrics.card_intake_body" as TranslationKey },
+            { titleKey: "metrics.card_readiness_title" as TranslationKey, bodyKey: "metrics.card_readiness_body" as TranslationKey },
+          ]).map((card) => (
+            <CardPanel key={card.titleKey}>
               <h4 className="mb-1.5 font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-                {card.title}
+                {t(card.titleKey)}
               </h4>
-              <p className="text-body-sm leading-relaxed text-ink-secondary">{card.body}</p>
+              <p className="text-body-sm leading-relaxed text-ink-secondary">{t(card.bodyKey)}</p>
             </CardPanel>
           ))}
         </div>
@@ -308,16 +297,16 @@ export function PilotMetricsDashboard({
 
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          AI Extraction & Human Confirmation
+          {t("metrics.ai_heading")}
         </h3>
         <CardPanel className="mt-4">
           <div className="grid gap-3 sm:grid-cols-2">
             {aiIntakeMetrics.map((m) => (
               <div
-                key={m.label}
+                key={m.labelKey}
                 className="flex items-baseline justify-between gap-4 border-b border-rule-light/40 pb-2 last:border-b-0 last:pb-0 sm:[&:nth-last-child(-n+2)]:border-b-0 sm:[&:nth-last-child(-n+2)]:pb-0"
               >
-                <span className="text-body-sm text-ink-secondary">{m.label}</span>
+                <span className="text-body-sm text-ink-secondary">{t(m.labelKey)}</span>
                 <span className="shrink-0 font-mono text-body-sm font-medium text-ink">{m.value}</span>
               </div>
             ))}
@@ -328,15 +317,15 @@ export function PilotMetricsDashboard({
       {/* Route distribution */}
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          Route Distribution
+          {t("metrics.route_heading")}
         </h3>
         <div className="mt-4 space-y-3">
           {routeDistribution.map((r) => {
             const pct = Math.round((r.count / r.total) * 100);
             return (
-              <div key={r.route} className="rounded-lg border border-rule-light bg-warm-white p-3.5">
+              <div key={r.routeKey} className="rounded-lg border border-rule-light bg-warm-white p-3.5">
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-body-sm font-medium text-ink">{r.route}</span>
+                  <span className="text-body-sm font-medium text-ink">{t(r.routeKey)}</span>
                   <span className="font-mono text-meta text-ink-secondary">
                     {r.count} / {r.total} ({pct}%)
                   </span>
@@ -356,16 +345,16 @@ export function PilotMetricsDashboard({
       {/* Safety & audit metrics */}
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          Safety & Audit Signals
+          {t("metrics.safety_heading")}
         </h3>
         <CardPanel className="mt-4">
           <div className="space-y-3">
             {safetyAuditMetrics.map((m) => (
               <div
-                key={m.label}
+                key={m.labelKey}
                 className="flex items-baseline justify-between gap-4 border-b border-rule-light/40 pb-3 last:border-b-0 last:pb-0"
               >
-                <span className="text-body-sm text-ink-secondary">{m.label}</span>
+                <span className="text-body-sm text-ink-secondary">{t(m.labelKey)}</span>
                 <span className="shrink-0 font-mono text-body-sm font-medium text-ink">{m.value}</span>
               </div>
             ))}
@@ -376,36 +365,36 @@ export function PilotMetricsDashboard({
       {/* Persistence Session card */}
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          Persisted Pilot Session
+          {t("metrics.persist_heading")}
         </h3>
         <CardPanel className="mt-4">
           <p className="text-body-sm text-muted">
-            Groups saved cases and reviewer feedback under a persisted pilot session. Backend-mediated persistence. No database secrets are stored in the frontend.
+            {t("metrics.persist_desc")}
           </p>
           <div className="mt-4 space-y-3">
             {/* Session status */}
             <div className="flex items-baseline justify-between gap-4">
-              <span className="text-body-sm text-ink-secondary">Session status</span>
+              <span className="text-body-sm text-ink-secondary">{t("metrics.persist_status")}</span>
               <span className={cn("rounded-badge border px-2 py-0.5 font-mono text-eyebrow uppercase",
                 persistedSessionStatus === "created" ? "border-routine/30 bg-routine/10 text-routine" : "border-rule bg-surface text-muted"
               )}>
-                {persistedSessionStatus === "created" ? "Active" : persistedSessionStatus === "creating" ? "Creating..." : "Not created"}
+                {persistedSessionStatus === "created" ? t("metrics.persist_active") : persistedSessionStatus === "creating" ? t("metrics.persist_creating") : t("metrics.persist_not_created")}
               </span>
             </div>
             {persistedSessionId && (
               <div className="flex items-baseline justify-between gap-4">
-                <span className="text-body-sm text-ink-secondary">Session ID</span>
+                <span className="text-body-sm text-ink-secondary">{t("metrics.persist_session_id")}</span>
                 <span className="font-mono text-label text-ink-secondary">{persistedSessionId}</span>
               </div>
             )}
             {persistedSessionLabel && (
               <div className="flex items-baseline justify-between gap-4">
-                <span className="text-body-sm text-ink-secondary">Label</span>
+                <span className="text-body-sm text-ink-secondary">{t("metrics.persist_label")}</span>
                 <span className="text-body-sm text-ink-secondary">{persistedSessionLabel}</span>
               </div>
             )}
             <div className="flex items-baseline justify-between gap-4">
-              <span className="text-body-sm text-ink-secondary">Cases processed in current session</span>
+              <span className="text-body-sm text-ink-secondary">{t("metrics.persist_cases_processed")}</span>
               <span className="font-mono text-label font-medium text-ink">{metrics.cases_processed}</span>
             </div>
           </div>
@@ -425,7 +414,7 @@ export function PilotMetricsDashboard({
                     : "border-accent bg-paper text-accent hover:bg-accent hover:text-white"
               )}
             >
-              {persistedSessionStatus === "created" ? "Session active" : persistedSessionStatus === "creating" ? "Creating..." : "Create Persisted Session"}
+              {persistedSessionStatus === "created" ? t("metrics.persist_btn_active") : persistedSessionStatus === "creating" ? t("metrics.persist_creating") : t("metrics.persist_btn_create")}
             </button>
             <button
               onClick={handleSaveSessionSummary}
@@ -439,7 +428,7 @@ export function PilotMetricsDashboard({
                     : "border-accent bg-paper text-accent hover:bg-accent hover:text-white"
               )}
             >
-              {summarySaveStatus === "saving" ? "Saving..." : summarySaveStatus === "saved" ? "Summary saved" : "Save Session Summary"}
+              {summarySaveStatus === "saving" ? t("metrics.persist_saving") : summarySaveStatus === "saved" ? t("metrics.persist_saved") : t("metrics.persist_btn_save")}
             </button>
             <button
               onClick={handleLoadSessionSummary}
@@ -451,7 +440,7 @@ export function PilotMetricsDashboard({
                   : "border-accent bg-paper text-accent hover:bg-accent hover:text-white"
               )}
             >
-              {summaryLoadStatus === "loading" ? "Loading..." : "Load Latest Persisted Summary"}
+              {summaryLoadStatus === "loading" ? t("metrics.persist_loading") : t("metrics.persist_btn_load")}
             </button>
           </div>
           {summarySaveError && (
@@ -462,21 +451,21 @@ export function PilotMetricsDashboard({
           )}
           {loadedSummaryPreview && (
             <div className="mt-4 rounded-lg border border-rule-light bg-surface/50 p-4">
-              <p className="mb-2 font-mono text-eyebrow font-medium uppercase text-muted">Persisted summary loaded</p>
+              <p className="mb-2 font-mono text-eyebrow font-medium uppercase text-muted">{t("metrics.persist_summary_loaded")}</p>
               <div className="space-y-1.5 text-meta">
-                <div className="flex justify-between"><span className="text-muted">Summary ID</span><span className="font-mono text-ink-secondary">{String(loadedSummaryPreview.summary_id ?? "—")}</span></div>
-                <div className="flex justify-between"><span className="text-muted">Generated at</span><span className="font-mono text-ink-secondary">{String(loadedSummaryPreview.created_at ?? loadedSummaryPreview.generated_at ?? "—")}</span></div>
+                <div className="flex justify-between"><span className="text-muted">{t("metrics.persist_summary_id")}</span><span className="font-mono text-ink-secondary">{String(loadedSummaryPreview.summary_id ?? "—")}</span></div>
+                <div className="flex justify-between"><span className="text-muted">{t("metrics.persist_generated_at")}</span><span className="font-mono text-ink-secondary">{String(loadedSummaryPreview.created_at ?? loadedSummaryPreview.generated_at ?? "—")}</span></div>
                 {loadedSummaryPreview.metrics_json && typeof loadedSummaryPreview.metrics_json === "object" ? (
                   <>
-                    <div className="flex justify-between"><span className="text-muted">Cases processed</span><span className="font-mono text-ink-secondary">{String((loadedSummaryPreview.metrics_json as Record<string, unknown>).cases_processed ?? "—")}</span></div>
-                    <div className="flex justify-between"><span className="text-muted">Cases reviewed</span><span className="font-mono text-ink-secondary">{String((loadedSummaryPreview.metrics_json as Record<string, unknown>).cases_reviewed ?? "—")}</span></div>
-                    <div className="flex justify-between"><span className="text-muted">Agreement rate</span><span className="font-mono text-ink-secondary">{formatRate(((loadedSummaryPreview.metrics_json as Record<string, unknown>).agreement_rate as number | null) ?? null)}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("metrics.cases_processed")}</span><span className="font-mono text-ink-secondary">{String((loadedSummaryPreview.metrics_json as Record<string, unknown>).cases_processed ?? "—")}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("metrics.reviewed")}</span><span className="font-mono text-ink-secondary">{String((loadedSummaryPreview.metrics_json as Record<string, unknown>).cases_reviewed ?? "—")}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("metrics.agreement_rate")}</span><span className="font-mono text-ink-secondary">{formatRate(((loadedSummaryPreview.metrics_json as Record<string, unknown>).agreement_rate as number | null) ?? null)}</span></div>
                   </>
                 ) : null}
-                <div className="flex justify-between"><span className="text-muted">Autonomous diagnosis events</span><span className="font-mono text-ink-secondary">0</span></div>
-                <div className="flex justify-between"><span className="text-muted">Autonomous prescription events</span><span className="font-mono text-ink-secondary">0</span></div>
+                <div className="flex justify-between"><span className="text-muted">{t("metrics.autonomous_dx")}</span><span className="font-mono text-ink-secondary">0</span></div>
+                <div className="flex justify-between"><span className="text-muted">{t("metrics.autonomous_rx")}</span><span className="font-mono text-ink-secondary">0</span></div>
               </div>
-              <p className="mt-2 text-eyebrow text-muted">Persisted summary loaded from backend. Simulated/anonymized cases only.</p>
+              <p className="mt-2 text-eyebrow text-muted">{t("metrics.persist_disclaimer")}</p>
             </div>
           )}
         </CardPanel>
@@ -485,16 +474,14 @@ export function PilotMetricsDashboard({
       {/* Critical wording */}
       <div className="mt-10 rounded-card border border-rule-light bg-surface p-5">
         <p className="text-body-sm leading-relaxed text-ink-secondary">
-          This dashboard does not claim clinical outcome improvement. It shows the
-          operational signals this current demo session produced.
+          {t("metrics.critical_wording")}
         </p>
       </div>
 
       {/* Disclaimer */}
       <div className="mt-8 border-t border-rule-light pt-4">
         <p className="max-w-[560px] text-meta leading-relaxed text-muted">
-          Soficca does not diagnose, prescribe, or replace clinical judgment.
-          These are current session metrics. They do not represent clinical validation or outcome improvement.
+          {t("metrics.footer_disclaimer")}
         </p>
       </div>
     </section>

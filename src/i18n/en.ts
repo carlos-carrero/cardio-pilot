@@ -690,6 +690,9 @@ const en = {
   "metrics.persist_summary_id": "Summary ID",
   "metrics.persist_generated_at": "Generated at",
   "metrics.persist_disclaimer": "Persisted summary loaded from backend. Simulated/anonymized cases only.",
+  "metrics.error_create_session": "Unexpected error creating session.",
+  "metrics.error_save_summary": "Unexpected error saving session summary.",
+  "metrics.error_load_summary": "Unexpected error loading session summary.",
 
   // Disclaimers
   "metrics.critical_wording": "This dashboard does not claim clinical outcome improvement. It shows the operational signals this current demo session produced.",

@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { SectionLabel } from "@/components/ui/section-label";
 import { cn } from "@/lib/cn";
 import { goldenScenarios, type GoldenScenario } from "@/data/golden-scenarios";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
 type CheckResult = "pass" | "fail" | "untested";
 
@@ -11,14 +13,14 @@ interface ScenarioState {
   results: Record<string, CheckResult>;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  intake: "Intake",
-  extraction: "AI Extraction",
-  correction: "Human Correction",
-  routing: "Soficca Routing",
-  report: "Final Report",
-  audit: "Audit Export",
-  safety: "Safety / Governance",
+const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
+  intake: "qaScreen.cat_intake",
+  extraction: "qaScreen.cat_extraction",
+  correction: "qaScreen.cat_correction",
+  routing: "qaScreen.cat_routing",
+  report: "qaScreen.cat_report",
+  audit: "qaScreen.cat_audit",
+  safety: "qaScreen.cat_safety",
 };
 
 const CATEGORY_ORDER = ["intake", "extraction", "correction", "routing", "report", "audit", "safety"];
@@ -28,11 +30,18 @@ interface QaScreenProps {
 }
 
 export function QaScreen({ onLoadScenario }: QaScreenProps) {
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<string>(goldenScenarios[0].id);
   const [scenarioStates, setScenarioStates] = useState<Record<string, ScenarioState>>({});
   const [copyMsg, setCopyMsg] = useState<string | null>(null);
 
   const selected = goldenScenarios.find((s) => s.id === selectedId) ?? goldenScenarios[0];
+
+  function gsLabel(id: string, fallback: string): string {
+    const key = `goldenScenario.${id}.label` as TranslationKey;
+    const v = t(key);
+    return v !== key ? v : fallback;
+  }
 
   function getState(scenarioId: string): ScenarioState {
     return scenarioStates[scenarioId] ?? { results: {} };
@@ -71,7 +80,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
         totalItems++;
         const r = getResult(scenario.id, check.id);
         if (r === "pass") { passed++; scenarioHasTest = true; }
-        else if (r === "fail") { failed++; scenarioHasTest = true; scenarioAllPass = false; failedLabels.push(`${scenario.label}: ${check.label}`); }
+        else if (r === "fail") { failed++; scenarioHasTest = true; scenarioAllPass = false; failedLabels.push(`${gsLabel(scenario.id, scenario.label)}: ${check.label}`); }
         else { untested++; scenarioAllPass = false; }
       }
       if (scenarioHasTest) scenariosTested++;
@@ -83,7 +92,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
 
   function handleCopyNarrative() {
     navigator.clipboard.writeText(selected.narrative).then(() => {
-      setCopyMsg("Copied!");
+      setCopyMsg(t("qaScreen.copied"));
       setTimeout(() => setCopyMsg(null), 1500);
     });
   }
@@ -94,7 +103,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
     for (const cat of CATEGORY_ORDER) {
       const items = selected.checklist.filter((c) => c.category === cat);
       if (items.length > 0) {
-        groups.push({ category: cat, label: CATEGORY_LABELS[cat] ?? cat, items });
+        groups.push({ category: cat, label: CATEGORY_LABEL_KEYS[cat] ? t(CATEGORY_LABEL_KEYS[cat]) : cat, items });
       }
     }
     return groups;
@@ -102,12 +111,12 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
 
   return (
     <section className="mx-auto max-w-[1360px] px-6 py-10 lg:py-14">
-      <SectionLabel>Golden Scenario QA</SectionLabel>
+      <SectionLabel>{t("qaScreen.section_label")}</SectionLabel>
       <h2 className="mt-3 font-sans text-heading-lg font-semibold leading-tight tracking-tighter text-ink">
-        End-to-end scenario validation
+        {t("qaScreen.heading")}
       </h2>
       <p className="mt-2 max-w-[560px] text-body leading-relaxed text-ink-secondary">
-        Verify the full pilot chain for each golden scenario. Mark each checklist item as you test.
+        {t("qaScreen.subtitle")}
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -132,10 +141,10 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
                       : "border-rule-light bg-warm-white hover:shadow-sm",
                   )}
                 >
-                  <span className="block text-body-sm font-semibold text-ink">{s.label}</span>
+                  <span className="block text-body-sm font-semibold text-ink">{gsLabel(s.id, s.label)}</span>
                   <span className="mt-0.5 block font-mono text-eyebrow text-muted">
-                    {checkedCount === 0 ? "Not run" : `${checkedCount}/${total} checked · ${passCount} passed`}
-                    {hasFail && <span className="ml-1 text-emergency">· has failures</span>}
+                    {checkedCount === 0 ? t("qaScreen.not_run") : `${checkedCount}/${total} ${t("qaScreen.checked")} · ${passCount} ${t("qaScreen.passed")}`}
+                    {hasFail && <span className="ml-1 text-emergency">· {t("qaScreen.has_failures")}</span>}
                   </span>
                 </button>
               );
@@ -147,9 +156,9 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-mono text-caption font-medium uppercase tracking-eyebrow text-muted">
-                  Scenario
+                  {t("qaScreen.scenario_label")}
                 </p>
-                <h3 className="mt-1 text-body-lg font-semibold text-ink">{selected.label}</h3>
+                <h3 className="mt-1 text-body-lg font-semibold text-ink">{gsLabel(selected.id, selected.label)}</h3>
               </div>
               <span className="shrink-0 rounded-badge border border-rule-light bg-surface px-2.5 py-0.5 font-mono text-caption font-medium text-ink-secondary">
                 {selected.expectedRoute}
@@ -159,7 +168,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
             {/* Narrative */}
             <div className="mt-4 rounded-lg border border-rule-light/60 bg-surface/40 p-3">
               <p className="mb-1 font-mono text-caption font-medium uppercase tracking-eyebrow text-muted">
-                Source narrative
+                {t("qaScreen.source_narrative")}
               </p>
               <p className="text-body-sm leading-relaxed text-ink-secondary">{selected.narrative}</p>
             </div>
@@ -171,21 +180,21 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
                   onClick={() => onLoadScenario(selected.narrative)}
                   className="inline-flex h-8 items-center rounded-btn border border-rule bg-warm-white px-3 font-mono text-caption uppercase tracking-wide text-ink-secondary transition-all hover:border-ink/30 hover:text-ink"
                 >
-                  Load into Pilot Flow
+                  {t("qaScreen.load_into_flow")}
                 </button>
               )}
               <button
                 onClick={handleCopyNarrative}
                 className="inline-flex h-8 items-center rounded-btn border border-rule bg-paper px-3 font-mono text-caption uppercase tracking-wide text-ink-secondary transition-all hover:border-accent hover:text-ink"
               >
-                {copyMsg ?? "Copy narrative"}
+                {copyMsg ?? t("qaScreen.copy_narrative")}
               </button>
             </div>
 
             {/* Expected fields */}
             <div className="mt-4">
               <p className="mb-2 font-mono text-caption font-medium uppercase tracking-eyebrow text-muted">
-                Expected key fields
+                {t("qaScreen.expected_fields")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(selected.expectedKeyFields).map(([key, val]) => (
@@ -198,7 +207,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
 
             {/* Expected safety */}
             <div className="mt-3">
-              <span className="font-mono text-eyebrow text-muted">Expected safety: </span>
+              <span className="font-mono text-eyebrow text-muted">{t("qaScreen.expected_safety")} </span>
               <span className={cn(
                 "font-mono text-eyebrow font-semibold",
                 selected.expectedSafetyStatus === "TRIGGERED" ? "text-emergency" : "text-routine",
@@ -224,13 +233,13 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
                           <ResultButton
                             active={result === "pass"}
                             color="routine"
-                            label="P"
+                            label={t("qaScreen.btn_pass")}
                             onClick={() => setCheckResult(selected.id, check.id, result === "pass" ? "untested" : "pass")}
                           />
                           <ResultButton
                             active={result === "fail"}
                             color="emergency"
-                            label="F"
+                            label={t("qaScreen.btn_fail")}
                             onClick={() => setCheckResult(selected.id, check.id, result === "fail" ? "untested" : "fail")}
                           />
                         </div>
@@ -254,21 +263,21 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
           {/* QA summary */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Golden scenario QA
+              {t("qaScreen.sidebar_title")}
             </p>
             <div className="mt-3 space-y-2 text-meta">
-              <MetricRow label="Scenarios tested" value={`${metrics.scenariosTested}/${goldenScenarios.length}`} />
-              <MetricRow label="Scenarios fully passed" value={String(metrics.scenariosPassed)} highlight={metrics.scenariosPassed === goldenScenarios.length} />
-              <MetricRow label="Checklist items passed" value={`${metrics.passed}/${metrics.totalItems}`} />
-              <MetricRow label="Failed items" value={String(metrics.failed)} warn={metrics.failed > 0} />
-              <MetricRow label="Untested items" value={String(metrics.untested)} />
+              <MetricRow label={t("qaScreen.metric_tested")} value={`${metrics.scenariosTested}/${goldenScenarios.length}`} />
+              <MetricRow label={t("qaScreen.metric_passed")} value={String(metrics.scenariosPassed)} highlight={metrics.scenariosPassed === goldenScenarios.length} />
+              <MetricRow label={t("qaScreen.metric_items_passed")} value={`${metrics.passed}/${metrics.totalItems}`} />
+              <MetricRow label={t("qaScreen.metric_failed")} value={String(metrics.failed)} warn={metrics.failed > 0} />
+              <MetricRow label={t("qaScreen.metric_untested")} value={String(metrics.untested)} />
               <div className="border-t border-rule-light pt-2">
-                <MetricRow label="Autonomous diagnosis events" value="0" />
-                <MetricRow label="Autonomous prescription events" value="0" />
+                <MetricRow label={t("qaScreen.metric_dx")} value="0" />
+                <MetricRow label={t("qaScreen.metric_rx")} value="0" />
               </div>
             </div>
             <p className="mt-3 border-t border-rule-light pt-2 text-eyebrow text-muted">
-              Manual QA session only. Scenario checklist results remain local and are not persisted.
+              {t("qaScreen.sidebar_disclaimer")}
             </p>
           </div>
 
@@ -276,7 +285,7 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
           {metrics.failed > 0 && (
             <div className="rounded-card border border-emergency/20 bg-emergency-soft p-5">
               <p className="font-mono text-eyebrow font-medium uppercase text-emergency">
-                Failed items
+                {t("qaScreen.failed_heading")}
               </p>
               <div className="mt-2 space-y-1">
                 {metrics.failedLabels.map((label, i) => (
@@ -289,25 +298,25 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
           {/* Manual steps */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Manual test steps
+              {t("qaScreen.manual_heading")}
             </p>
             <div className="mt-3 space-y-2">
-              {[
-                "Load or copy scenario narrative",
-                "Navigate to Pilot Flow → Intake",
-                "Paste narrative and run AI extraction",
-                "Review extracted fields, optionally edit one",
-                "Confirm and run Soficca routing",
-                "Verify final route matches expected",
-                "Check report sections and signal chain",
-                "Export Audit JSON and Markdown",
-                "Return here and mark checklist items",
-              ].map((step, i) => (
+              {([
+                "qaScreen.step_1" as TranslationKey,
+                "qaScreen.step_2" as TranslationKey,
+                "qaScreen.step_3" as TranslationKey,
+                "qaScreen.step_4" as TranslationKey,
+                "qaScreen.step_5" as TranslationKey,
+                "qaScreen.step_6" as TranslationKey,
+                "qaScreen.step_7" as TranslationKey,
+                "qaScreen.step_8" as TranslationKey,
+                "qaScreen.step_9" as TranslationKey,
+              ]).map((key, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-rule bg-surface font-mono text-eyebrow font-semibold text-muted">
                     {i + 1}
                   </span>
-                  <span className="text-caption leading-snug text-ink-secondary">{step}</span>
+                  <span className="text-caption leading-snug text-ink-secondary">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -316,12 +325,10 @@ export function QaScreen({ onLoadScenario }: QaScreenProps) {
           {/* Governance note */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              QA scope
+              {t("qaScreen.scope_heading")}
             </p>
             <p className="mt-2 text-caption leading-relaxed text-muted">
-              This QA validates end-to-end scenario flow, not clinical outcomes.
-              Route matching confirms deterministic engine behavior against predefined demo scenarios.
-              No clinical validation, safety proof, or outcome measurement is claimed.
+              {t("qaScreen.scope_body")}
             </p>
           </div>
         </aside>

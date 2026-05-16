@@ -2,72 +2,74 @@
 
 import { SectionLabel } from "@/components/ui/section-label";
 import { CardPanel } from "@/components/ui/card-panel";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
-const SECTIONS: { title: string; items: string[] }[] = [
+const SECTIONS: { titleKey: TranslationKey; itemKeys: TranslationKey[] }[] = [
   {
-    title: "What the pilot demonstrates",
-    items: [
-      "Guided cardiovascular intake from free-text narrative.",
-      "Real AI signal extraction with field evidence and confidence.",
-      "Human-confirmed structured input before routing.",
-      "Deterministic Soficca routing with safety policy enforcement.",
-      "Physician-reviewable governed report with audit trace.",
-      "Reviewer feedback loop with structured agreement capture and database persistence for saved cases.",
-      "Session metrics reflecting cases, routes, and reviewer signals with optional persisted summaries.",
-      "Audit export (JSON and Markdown) for individual cases and full sessions.",
-      "Database persistence for saved cases, reviewer feedback, and session summaries.",
+    titleKey: "pilotSummary.sec_demonstrates",
+    itemKeys: [
+      "pilotSummary.demo_intake",
+      "pilotSummary.demo_extraction",
+      "pilotSummary.demo_confirmed",
+      "pilotSummary.demo_routing",
+      "pilotSummary.demo_report",
+      "pilotSummary.demo_feedback",
+      "pilotSummary.demo_metrics",
+      "pilotSummary.demo_audit",
+      "pilotSummary.demo_persistence",
     ],
   },
   {
-    title: "What Soficca governs",
-    items: [
-      "Routing logic — deterministic rules, not AI decisions.",
-      "Safety policy — red-flag detection and escalation overrides.",
-      "Versioned ruleset and engine trace for every routed case.",
-      "Missing information handling — deferrals when data is insufficient.",
-      "Conflict handling — blocks routing when inputs are contradictory.",
-      "Report integrity — no diagnosis, no prescription, human review required.",
+    titleKey: "pilotSummary.sec_governs",
+    itemKeys: [
+      "pilotSummary.gov_routing",
+      "pilotSummary.gov_safety",
+      "pilotSummary.gov_versioned",
+      "pilotSummary.gov_missing",
+      "pilotSummary.gov_conflict",
+      "pilotSummary.gov_integrity",
     ],
   },
   {
-    title: "What AI does",
-    items: [
-      "Structures free-text narratives into clinical signals.",
-      "Provides field-level evidence with source text and confidence.",
-      "Summarizes extracted facts for physician review.",
-      "Suggests intake completion questions for missing data.",
-      "Flags missing, uncertain, or potentially conflicting information.",
+    titleKey: "pilotSummary.sec_ai_does",
+    itemKeys: [
+      "pilotSummary.ai_structures",
+      "pilotSummary.ai_evidence",
+      "pilotSummary.ai_summarizes",
+      "pilotSummary.ai_questions",
+      "pilotSummary.ai_flags",
     ],
   },
   {
-    title: "What AI does not do",
-    items: [
-      "Does not diagnose.",
-      "Does not prescribe.",
-      "Does not decide the route.",
-      "Does not replace physician judgment.",
+    titleKey: "pilotSummary.sec_ai_not",
+    itemKeys: [
+      "pilotSummary.ainot_diagnose",
+      "pilotSummary.ainot_prescribe",
+      "pilotSummary.ainot_route",
+      "pilotSummary.ainot_replace",
     ],
   },
 ];
 
-const READINESS_ITEMS: { label: string; status: "ready" | "next" | "scope" }[] = [
-  { label: "Deterministic routing engine", status: "ready" },
-  { label: "Safety policy enforcement", status: "ready" },
-  { label: "Real AI extraction (backend)", status: "ready" },
-  { label: "Real deterministic backend routing", status: "ready" },
-  { label: "Structured extraction schema", status: "ready" },
-  { label: "Audit trace generation", status: "ready" },
-  { label: "Reviewer feedback workflow", status: "ready" },
-  { label: "Database persistence (cases, feedback, summaries)", status: "ready" },
-  { label: "Persisted reviewer feedback", status: "ready" },
-  { label: "Persisted session summaries", status: "ready" },
-  { label: "Session metrics dashboard (local-derived)", status: "ready" },
-  { label: "Session and case audit export", status: "ready" },
-  { label: "Demo guide and scenario shortcuts", status: "ready" },
-  { label: "Controlled physician pilot", status: "next" },
-  { label: "Aggregated metrics across sessions", status: "next" },
-  { label: "Authentication / access control", status: "next" },
-  { label: "Multi-site deployment", status: "scope" },
+const READINESS_ITEMS: { labelKey: TranslationKey; status: "ready" | "next" | "scope" }[] = [
+  { labelKey: "pilotSummary.rdy_routing_engine", status: "ready" },
+  { labelKey: "pilotSummary.rdy_safety_policy", status: "ready" },
+  { labelKey: "pilotSummary.rdy_ai_extraction", status: "ready" },
+  { labelKey: "pilotSummary.rdy_backend_routing", status: "ready" },
+  { labelKey: "pilotSummary.rdy_schema", status: "ready" },
+  { labelKey: "pilotSummary.rdy_audit_trace", status: "ready" },
+  { labelKey: "pilotSummary.rdy_feedback", status: "ready" },
+  { labelKey: "pilotSummary.rdy_persistence", status: "ready" },
+  { labelKey: "pilotSummary.rdy_persisted_feedback", status: "ready" },
+  { labelKey: "pilotSummary.rdy_persisted_summaries", status: "ready" },
+  { labelKey: "pilotSummary.rdy_metrics_dashboard", status: "ready" },
+  { labelKey: "pilotSummary.rdy_audit_export", status: "ready" },
+  { labelKey: "pilotSummary.rdy_demo_guide", status: "ready" },
+  { labelKey: "pilotSummary.rdy_controlled_pilot", status: "next" },
+  { labelKey: "pilotSummary.rdy_aggregated_metrics", status: "next" },
+  { labelKey: "pilotSummary.rdy_auth", status: "next" },
+  { labelKey: "pilotSummary.rdy_multisite", status: "scope" },
 ];
 
 function statusColor(s: "ready" | "next" | "scope"): string {
@@ -76,42 +78,43 @@ function statusColor(s: "ready" | "next" | "scope"): string {
   return "bg-muted/30";
 }
 
-function statusLabel(s: "ready" | "next" | "scope"): string {
-  if (s === "ready") return "Ready";
-  if (s === "next") return "Next stage";
-  return "Out of scope";
+function statusLabelKey(s: "ready" | "next" | "scope"): TranslationKey {
+  if (s === "ready") return "pilotSummary.status_ready";
+  if (s === "next") return "pilotSummary.status_next";
+  return "pilotSummary.status_scope";
 }
 
 export function PilotSummary() {
+  const { t } = useTranslation();
   return (
     <section className="mx-auto max-w-[1360px] px-6 py-10 lg:py-14">
-      <SectionLabel>Pilot Summary</SectionLabel>
+      <SectionLabel>{t("pilotSummary.section_label")}</SectionLabel>
       <h2 className="mt-3 font-sans text-heading-lg font-semibold leading-tight tracking-tighter text-ink">
-        Governed cardiovascular triage infrastructure for physician review
+        {t("pilotSummary.heading")}
       </h2>
       <p className="mt-3 max-w-[640px] text-body leading-relaxed text-ink-secondary">
-        AI structures the signal. Soficca governs the route. Physicians make the final decision.
+        {t("pilotSummary.subtitle")}
       </p>
 
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
         <span className="h-1.5 w-1.5 rounded-full bg-routine" />
         <span className="font-mono text-label text-muted">
-          Local-first pilot · Real AI extraction · Real deterministic routing · Database persistence available for saved cases, reviewer feedback, and session summaries
+          {t("pilotSummary.banner")}
         </span>
       </div>
 
       {/* Section cards */}
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         {SECTIONS.map((sec) => (
-          <CardPanel key={sec.title}>
+          <CardPanel key={sec.titleKey}>
             <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              {sec.title}
+              {t(sec.titleKey)}
             </h3>
             <ul className="space-y-2">
-              {sec.items.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
+              {sec.itemKeys.map((key) => (
+                <li key={key} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
                   <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-accent/40" />
-                  {item}
+                  {t(key)}
                 </li>
               ))}
             </ul>
@@ -123,38 +126,38 @@ export function PilotSummary() {
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <CardPanel>
           <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-            Current stage
+            {t("pilotSummary.current_stage")}
           </h3>
           <ul className="space-y-2">
-            {[
-              "Local-first pilot with real backend services.",
-              "Real AI extraction via OpenAI backend.",
-              "Real deterministic Soficca routing engine.",
-              "Reviewer workflow with database persistence for saved cases.",
-              "Session summaries can be persisted and loaded.",
-              "Local queue and metrics reset on reload — persisted data remains in database.",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
+            {([
+              "pilotSummary.cur_backend" as TranslationKey,
+              "pilotSummary.cur_ai" as TranslationKey,
+              "pilotSummary.cur_routing" as TranslationKey,
+              "pilotSummary.cur_reviewer" as TranslationKey,
+              "pilotSummary.cur_summaries" as TranslationKey,
+              "pilotSummary.cur_reset" as TranslationKey,
+            ]).map((key) => (
+              <li key={key} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
                 <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-routine" />
-                {item}
+                {t(key)}
               </li>
             ))}
           </ul>
         </CardPanel>
         <CardPanel>
           <h3 className="mb-3 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-            Next stage
+            {t("pilotSummary.next_stage")}
           </h3>
           <ul className="space-y-2">
-            {[
-              "Controlled physician pilot with expanded reviewer pool.",
-              "Aggregated metrics across sessions and reviewers.",
-              "Authentication and access control.",
-              "Session restoration on page reload.",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
+            {([
+              "pilotSummary.nxt_pilot" as TranslationKey,
+              "pilotSummary.nxt_aggregated" as TranslationKey,
+              "pilotSummary.nxt_auth" as TranslationKey,
+              "pilotSummary.nxt_restore" as TranslationKey,
+            ]).map((key) => (
+              <li key={key} className="flex items-start gap-2 text-body-sm leading-relaxed text-ink-secondary">
                 <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-urgent" />
-                {item}
+                {t(key)}
               </li>
             ))}
           </ul>
@@ -164,21 +167,21 @@ export function PilotSummary() {
       {/* Readiness for next stage */}
       <div className="mt-10">
         <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-          Component readiness
+          {t("pilotSummary.readiness_heading")}
         </h3>
         <CardPanel className="mt-4">
           <div className="space-y-2">
             {READINESS_ITEMS.map((item) => (
               <div
-                key={item.label}
+                key={item.labelKey}
                 className="flex items-center justify-between gap-4 border-b border-rule-light/40 pb-2.5 last:border-b-0 last:pb-0"
               >
                 <div className="flex items-center gap-2.5">
                   <span className={`block h-2 w-2 shrink-0 rounded-full ${statusColor(item.status)}`} />
-                  <span className="text-body-sm text-ink-secondary">{item.label}</span>
+                  <span className="text-body-sm text-ink-secondary">{t(item.labelKey)}</span>
                 </div>
                 <span className="shrink-0 font-mono text-label uppercase tracking-wide text-muted">
-                  {statusLabel(item.status)}
+                  {t(statusLabelKey(item.status))}
                 </span>
               </div>
             ))}
@@ -189,8 +192,7 @@ export function PilotSummary() {
       {/* Disclaimer */}
       <div className="mt-10 border-t border-rule-light pt-4">
         <p className="max-w-[560px] text-meta leading-relaxed text-muted">
-          Soficca does not diagnose, prescribe, or replace clinical judgment.
-          This pilot structures symptoms and safety-routing signals for human clinical review.
+          {t("pilotSummary.disclaimer")}
         </p>
       </div>
     </section>

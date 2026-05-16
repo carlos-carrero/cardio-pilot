@@ -5,6 +5,8 @@ import { SectionLabel } from "@/components/ui/section-label";
 import { CardPanel } from "@/components/ui/card-panel";
 import { cn } from "@/lib/cn";
 import { goldenScenarios } from "@/data/golden-scenarios";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 import type { SessionMetrics } from "@/types";
 
 // ── Types ───────────────────────────────────────────────────────
@@ -13,47 +15,47 @@ type CheckPhase = "before" | "during" | "after";
 
 interface CheckItem {
   id: string;
-  label: string;
+  labelKey: TranslationKey;
   phase: CheckPhase;
 }
 
 const CHECKLIST: CheckItem[] = [
   // Before
-  { id: "be_backend", label: "Backend running (local port 8000 or deployed URL)", phase: "before" },
-  { id: "be_frontend", label: "Frontend running (local or Vercel)", phase: "before" },
-  { id: "be_openai", label: "OPENAI_API_KEY configured in backend environment", phase: "before" },
-  { id: "be_db", label: "DATABASE_URL configured on backend (for persistence)", phase: "before" },
-  { id: "be_ai_extraction", label: "Real AI extraction working", phase: "before" },
-  { id: "be_backend_routing", label: "Real deterministic backend routing working", phase: "before" },
-  { id: "be_reviewer_empty", label: "Reviewer queue empty or reset", phase: "before" },
-  { id: "be_metrics_reset", label: "Metrics session reset or ready", phase: "before" },
-  { id: "be_simulated_only", label: "Use simulated / anonymized cases only", phase: "before" },
-  { id: "be_no_clinical", label: "No clinical validation claims", phase: "before" },
+  { id: "be_backend", labelKey: "demoGuide.ck_backend", phase: "before" },
+  { id: "be_frontend", labelKey: "demoGuide.ck_frontend", phase: "before" },
+  { id: "be_openai", labelKey: "demoGuide.ck_openai", phase: "before" },
+  { id: "be_db", labelKey: "demoGuide.ck_db", phase: "before" },
+  { id: "be_ai_extraction", labelKey: "demoGuide.ck_ai_extraction", phase: "before" },
+  { id: "be_backend_routing", labelKey: "demoGuide.ck_backend_routing", phase: "before" },
+  { id: "be_reviewer_empty", labelKey: "demoGuide.ck_reviewer_empty", phase: "before" },
+  { id: "be_metrics_reset", labelKey: "demoGuide.ck_metrics_reset", phase: "before" },
+  { id: "be_simulated_only", labelKey: "demoGuide.ck_simulated", phase: "before" },
+  { id: "be_no_clinical", labelKey: "demoGuide.ck_no_clinical", phase: "before" },
   // During
-  { id: "du_intake", label: "Show guided intake", phase: "during" },
-  { id: "du_extraction", label: "Show AI extraction", phase: "during" },
-  { id: "du_correction", label: "Show human correction", phase: "during" },
-  { id: "du_routing", label: "Show Soficca routing", phase: "during" },
-  { id: "du_report", label: "Show audit report", phase: "during" },
-  { id: "du_reviewer", label: "Send to reviewer", phase: "during" },
-  { id: "du_feedback", label: "Submit reviewer feedback", phase: "during" },
-  { id: "du_metrics", label: "Show metrics", phase: "during" },
-  { id: "du_export", label: "Export session summary", phase: "during" },
+  { id: "du_intake", labelKey: "demoGuide.ck_intake", phase: "during" },
+  { id: "du_extraction", labelKey: "demoGuide.ck_extraction", phase: "during" },
+  { id: "du_correction", labelKey: "demoGuide.ck_correction", phase: "during" },
+  { id: "du_routing", labelKey: "demoGuide.ck_routing", phase: "during" },
+  { id: "du_report", labelKey: "demoGuide.ck_report", phase: "during" },
+  { id: "du_reviewer", labelKey: "demoGuide.ck_reviewer", phase: "during" },
+  { id: "du_feedback", labelKey: "demoGuide.ck_feedback", phase: "during" },
+  { id: "du_metrics", labelKey: "demoGuide.ck_metrics", phase: "during" },
+  { id: "du_export", labelKey: "demoGuide.ck_export", phase: "during" },
   // After
-  { id: "af_audit", label: "Export audit JSON / Markdown if useful", phase: "after" },
-  { id: "af_session", label: "Export session summary if useful", phase: "after" },
-  { id: "af_persist_session", label: "Create persisted session (Metrics Dashboard)", phase: "after" },
-  { id: "af_persist_case", label: "Save case to database", phase: "after" },
-  { id: "af_persist_feedback", label: "Persist reviewer feedback", phase: "after" },
-  { id: "af_persist_summary", label: "Save session summary to backend", phase: "after" },
-  { id: "af_persist_load", label: "Load persisted summary / cases", phase: "after" },
-  { id: "af_reset", label: "Reset current demo session if needed", phase: "after" },
+  { id: "af_audit", labelKey: "demoGuide.ck_af_audit", phase: "after" },
+  { id: "af_session", labelKey: "demoGuide.ck_af_session", phase: "after" },
+  { id: "af_persist_session", labelKey: "demoGuide.ck_af_persist_session", phase: "after" },
+  { id: "af_persist_case", labelKey: "demoGuide.ck_af_persist_case", phase: "after" },
+  { id: "af_persist_feedback", labelKey: "demoGuide.ck_af_persist_feedback", phase: "after" },
+  { id: "af_persist_summary", labelKey: "demoGuide.ck_af_persist_summary", phase: "after" },
+  { id: "af_persist_load", labelKey: "demoGuide.ck_af_persist_load", phase: "after" },
+  { id: "af_reset", labelKey: "demoGuide.ck_af_reset", phase: "after" },
 ];
 
-const PHASE_LABELS: Record<CheckPhase, string> = {
-  before: "Before demo",
-  during: "During demo",
-  after: "After demo",
+const PHASE_LABEL_KEYS: Record<CheckPhase, TranslationKey> = {
+  before: "demoGuide.phase_before",
+  during: "demoGuide.phase_during",
+  after: "demoGuide.phase_after",
 };
 
 interface DemoGuideProps {
@@ -65,6 +67,7 @@ interface DemoGuideProps {
 // ── Component ───────────────────────────────────────────────────
 
 export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuideProps) {
+  const { t } = useTranslation();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [resetConfirm, setResetConfirm] = useState(false);
   const [copyMsg, setCopyMsg] = useState<string | null>(null);
@@ -95,15 +98,15 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
 
   return (
     <section className="mx-auto max-w-[1360px] px-6 py-10 lg:py-14">
-      <SectionLabel>Demo Guide</SectionLabel>
+      <SectionLabel>{t("demoGuide.section_label")}</SectionLabel>
       <h2 className="mt-3 font-sans text-heading-lg font-semibold leading-tight tracking-tighter text-ink">
-        Guided demo script for advisors, physicians, and stakeholders
+        {t("demoGuide.heading")}
       </h2>
 
       <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" />
         <span className="font-mono text-label text-muted">
-          Local-first demo · Real AI extraction · Real routing · Database persistence available
+          {t("demoGuide.banner")}
         </span>
       </div>
 
@@ -114,52 +117,48 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
           {/* Suggested opening */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Suggested opening
+              {t("demoGuide.opening_heading")}
             </h3>
             <blockquote className="mt-3 border-l-2 border-rule pl-4 text-body leading-relaxed text-ink italic">
-              &ldquo;Soficca is the governed decision layer underneath clinical workflows.
-              In this pilot, AI structures messy cardiovascular narratives, humans confirm the structured signal,
-              and Soficca applies deterministic safety routing.&rdquo;
+              &ldquo;{t("demoGuide.opening_quote")}&rdquo;
             </blockquote>
           </CardPanel>
 
           {/* Demo objective */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Demo objective
+              {t("demoGuide.objective_heading")}
             </h3>
             <p className="mt-3 text-body leading-relaxed text-ink-secondary">
-              Show how Soficca converts free-text cardiovascular narratives into structured signals,
-              allows human confirmation, applies deterministic routing, generates an auditable report,
-              sends a case to reviewer, captures feedback, and exports session metrics.
+              {t("demoGuide.objective_body")}
             </p>
           </CardPanel>
 
           {/* Recommended 3-minute demo flow */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Recommended 3-minute demo flow
+              {t("demoGuide.flow_heading")}
             </h3>
             <div className="mt-4 space-y-2.5">
-              {[
-                "Start with the Welcome / Pilot Flow.",
-                "Load the Emergency red-flag golden scenario.",
-                "Show guided intake signals and completeness.",
-                "Run real AI extraction.",
-                "Show structured summary, field evidence, missing info, and completion questions.",
-                "Edit one field to demonstrate human confirmation.",
-                "Run Soficca deterministic routing.",
-                "Show final report, signal chain, human correction status, and audit trace.",
-                "Send case to Reviewer.",
-                "Submit reviewer feedback.",
-                "Open Metrics and show current session metrics.",
-                "Export session summary or case audit record.",
-              ].map((step, i) => (
+              {([
+                "demoGuide.flow_1" as TranslationKey,
+                "demoGuide.flow_2" as TranslationKey,
+                "demoGuide.flow_3" as TranslationKey,
+                "demoGuide.flow_4" as TranslationKey,
+                "demoGuide.flow_5" as TranslationKey,
+                "demoGuide.flow_6" as TranslationKey,
+                "demoGuide.flow_7" as TranslationKey,
+                "demoGuide.flow_8" as TranslationKey,
+                "demoGuide.flow_9" as TranslationKey,
+                "demoGuide.flow_10" as TranslationKey,
+                "demoGuide.flow_11" as TranslationKey,
+                "demoGuide.flow_12" as TranslationKey,
+              ]).map((key, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-rule bg-surface font-mono text-eyebrow font-bold text-muted">
                     {i + 1}
                   </span>
-                  <span className="text-body-sm leading-snug text-ink-secondary">{step}</span>
+                  <span className="text-body-sm leading-snug text-ink-secondary">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -168,30 +167,29 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
           {/* What to say */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Core message
+              {t("demoGuide.core_heading")}
             </h3>
             <blockquote className="mt-3 border-l-2 border-rule pl-4 text-body leading-relaxed text-ink-secondary italic">
-              &ldquo;AI structures the signal. The human confirms the extraction.
-              Soficca applies deterministic safety routing. The physician remains the final decision-maker.&rdquo;
+              &ldquo;{t("demoGuide.core_quote")}&rdquo;
             </blockquote>
           </CardPanel>
 
           {/* What not to claim */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              What not to claim
+              {t("demoGuide.noclaim_heading")}
             </h3>
             <ul className="mt-3 space-y-1.5 text-body-sm text-ink-secondary">
-              {[
-                "Do not claim clinical validation.",
-                "Do not claim improved outcomes.",
-                "Do not claim realized cost reduction.",
-                "Do not claim AI diagnoses or decides route.",
-                "Do not use real identifiable patient data.",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2">
+              {([
+                "demoGuide.noclaim_1" as TranslationKey,
+                "demoGuide.noclaim_2" as TranslationKey,
+                "demoGuide.noclaim_3" as TranslationKey,
+                "demoGuide.noclaim_4" as TranslationKey,
+                "demoGuide.noclaim_5" as TranslationKey,
+              ]).map((key) => (
+                <li key={key} className="flex items-start gap-2">
                   <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-emergency/60" />
-                  {item}
+                  {t(key)}
                 </li>
               ))}
             </ul>
@@ -200,25 +198,29 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
           {/* Golden scenario shortcuts */}
           <CardPanel>
             <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-              Golden scenario shortcuts
+              {t("demoGuide.shortcuts_heading")}
             </h3>
             <p className="mt-2 text-meta text-muted">
-              Use simulated scenarios only. Loads narrative into Pilot Flow intake.
+              {t("demoGuide.shortcuts_hint")}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {demoScenarios.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => handleLoadScenario(s.narrative, s.label)}
+                  onClick={() => {
+                    const key = `goldenScenario.${s.id}.label` as TranslationKey;
+                    const lbl = t(key) !== key ? t(key) : s.label;
+                    handleLoadScenario(s.narrative, lbl);
+                  }}
                   className="inline-flex h-9 items-center rounded-btn border border-rule bg-warm-white px-3.5 font-mono text-eyebrow uppercase tracking-wide text-ink-secondary transition-all hover:border-ink/30 hover:text-ink"
                 >
-                  {s.label}
+                  {(() => { const key = `goldenScenario.${s.id}.label` as TranslationKey; const v = t(key); return v !== key ? v : s.label; })()}
                 </button>
               ))}
             </div>
             {copyMsg && (
               <p className="mt-2 font-mono text-eyebrow text-routine">
-                Loaded: {copyMsg} — navigate to Pilot Flow
+                {t("demoGuide.loaded_prefix")} {copyMsg} — {t("demoGuide.loaded_suffix")}
               </p>
             )}
           </CardPanel>
@@ -230,7 +232,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
               return (
                 <CardPanel key={phase}>
                   <h3 className="font-mono text-label font-medium uppercase tracking-label text-ink-secondary">
-                    {PHASE_LABELS[phase]}
+                    {t(PHASE_LABEL_KEYS[phase])}
                   </h3>
                   <div className="mt-3 space-y-2">
                     {items.map((item) => (
@@ -248,7 +250,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
                           "text-body-sm",
                           checked[item.id] ? "text-ink-secondary line-through" : "text-ink-secondary",
                         )}>
-                          {item.label}
+                          {t(item.labelKey)}
                         </span>
                       </label>
                     ))}
@@ -264,60 +266,60 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
           {/* Demo mode status */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Demo mode status
+              {t("demoGuide.status_heading")}
             </p>
             <div className="mt-3 space-y-2 text-meta">
-              <StatusRow label="Data mode" value="Local / session only" />
-              <StatusRow label="AI extraction" value="Real backend AI · fallback available" />
-              <StatusRow label="Routing" value="Real deterministic backend · fallback available" />
-              <StatusRow label="Reviewer queue" value="Local · feedback persisted for saved cases" />
-              <StatusRow label="Metrics" value="Local-derived · persisted summaries available" />
-              <StatusRow label="Persistence" value="Cases, feedback, sessions, summaries" />
-              <StatusRow label="Clinical claims" value="Not validated" />
+              <StatusRow label={t("demoGuide.status_data_mode")} value={t("demoGuide.status_data_value")} />
+              <StatusRow label={t("demoGuide.status_ai")} value={t("demoGuide.status_ai_value")} />
+              <StatusRow label={t("demoGuide.status_routing")} value={t("demoGuide.status_routing_value")} />
+              <StatusRow label={t("demoGuide.status_reviewer")} value={t("demoGuide.status_reviewer_value")} />
+              <StatusRow label={t("demoGuide.status_metrics")} value={t("demoGuide.status_metrics_value")} />
+              <StatusRow label={t("demoGuide.status_persistence")} value={t("demoGuide.status_persistence_value")} />
+              <StatusRow label={t("demoGuide.status_clinical")} value={t("demoGuide.status_clinical_value")} />
             </div>
           </div>
 
           {/* Session snapshot */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Current session snapshot
+              {t("demoGuide.snapshot_heading")}
             </p>
             <div className="mt-3 space-y-2 text-meta">
-              <StatusRow label="Cases processed" value={String(metrics.cases_processed)} />
-              <StatusRow label="Sent to reviewer" value={String(metrics.cases_sent_to_reviewer)} />
-              <StatusRow label="Reviewed" value={String(metrics.cases_reviewed)} />
-              <StatusRow label="Pending review" value={String(metrics.pending_review)} />
+              <StatusRow label={t("demoGuide.snapshot_processed")} value={String(metrics.cases_processed)} />
+              <StatusRow label={t("demoGuide.snapshot_sent")} value={String(metrics.cases_sent_to_reviewer)} />
+              <StatusRow label={t("demoGuide.snapshot_reviewed")} value={String(metrics.cases_reviewed)} />
+              <StatusRow label={t("demoGuide.snapshot_pending")} value={String(metrics.pending_review)} />
             </div>
           </div>
 
           {/* Demo outputs */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Demo outputs
+              {t("demoGuide.outputs_heading")}
             </p>
             <ul className="mt-3 space-y-1.5 text-meta text-ink-secondary">
-              <li>Case audit JSON</li>
-              <li>Case audit Markdown</li>
-              <li>Session summary JSON</li>
-              <li>Session summary Markdown</li>
-              <li>Reviewer feedback summary</li>
-              <li>Local metrics dashboard</li>
+              <li>{t("demoGuide.output_audit_json")}</li>
+              <li>{t("demoGuide.output_audit_md")}</li>
+              <li>{t("demoGuide.output_session_json")}</li>
+              <li>{t("demoGuide.output_session_md")}</li>
+              <li>{t("demoGuide.output_feedback")}</li>
+              <li>{t("demoGuide.output_metrics")}</li>
             </ul>
             <p className="mt-3 border-t border-rule-light pt-2 font-mono text-eyebrow text-muted">
-              Exports are local files generated in the browser. No session data is persisted in Stage 2B.9.
+              {t("demoGuide.outputs_disclaimer")}
             </p>
           </div>
 
           {/* Reset local session */}
           <div className="rounded-card border border-rule-light/80 bg-warm-white shadow-card p-5">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Reset local demo session
+              {t("demoGuide.reset_heading")}
             </p>
             <p className="mt-2 text-caption leading-relaxed text-muted">
-              Clears local demo cases, reviewer feedback, and session metrics. Does not affect backend code or saved files.
+              {t("demoGuide.reset_desc")}
             </p>
             <p className="mt-1 font-mono text-eyebrow text-muted">
-              Local reset only. No backend data is deleted.
+              {t("demoGuide.reset_note")}
             </p>
             <button
               onClick={handleReset}
@@ -328,14 +330,14 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
                   : "border-rule bg-paper text-muted hover:border-accent hover:text-accent",
               )}
             >
-              {resetConfirm ? "Confirm reset — clears all current session data" : "Reset current demo session"}
+              {resetConfirm ? t("demoGuide.reset_confirm") : t("demoGuide.reset_btn")}
             </button>
             {resetConfirm && (
               <button
                 onClick={() => setResetConfirm(false)}
                 className="mt-1.5 w-full rounded-btn border border-rule-light px-3.5 py-1.5 font-mono text-eyebrow text-muted transition-all hover:text-ink"
               >
-                Cancel
+                {t("demoGuide.reset_cancel")}
               </button>
             )}
           </div>
@@ -343,8 +345,7 @@ export function DemoGuide({ metrics, onLoadScenario, onResetSession }: DemoGuide
           {/* Governance */}
           <div className="rounded-xl border border-rule-light bg-surface p-5">
             <p className="text-meta leading-relaxed text-muted">
-              This demo does not claim clinical validation, outcome improvement, or realized cost reduction.
-              Soficca does not diagnose, prescribe, or replace clinical judgment.
+              {t("demoGuide.disclaimer")}
             </p>
           </div>
         </aside>

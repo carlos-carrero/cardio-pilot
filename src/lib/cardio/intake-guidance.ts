@@ -1,4 +1,8 @@
-// ── Intake guidance helpers (frontend-only, lightweight) ────────
+// ── Intake guidance helpers (frontend-only, lightweight) ────────────────
+
+import type { TranslationKey } from "@/i18n/en";
+
+type TFunc = (key: TranslationKey) => string;
 
 export type SignalGroupId =
   | "patient"
@@ -102,12 +106,45 @@ const SIGNAL_GROUP_ORDER: { id: SignalGroupId; label: string }[] = [
   { id: "meds", label: "Medication / context" },
 ];
 
+const SIGNAL_LABEL_KEYS: Record<string, TranslationKey> = {
+  age: "intakeSignal.age",
+  chest_pain: "intakeSignal.chest_pain",
+  duration: "intakeSignal.duration",
+  character: "intakeSignal.character",
+  severity: "intakeSignal.severity",
+  radiation: "intakeSignal.radiation",
+  exertional: "intakeSignal.exertional",
+  dyspnea: "intakeSignal.dyspnea",
+  syncope: "intakeSignal.syncope",
+  diaphoresis: "intakeSignal.diaphoresis",
+  bp: "intakeSignal.bp",
+  hr: "intakeSignal.hr",
+  cad_mi: "intakeSignal.cad_mi",
+  cv_risk: "intakeSignal.cv_risk",
+  meds: "intakeSignal.meds",
+};
+
+const GROUP_LABEL_KEYS: Record<SignalGroupId, TranslationKey> = {
+  patient: "intakeGroup.patient",
+  complaint: "intakeGroup.complaint",
+  red_flags: "intakeGroup.red_flags",
+  vitals: "intakeGroup.vitals",
+  cv_history: "intakeGroup.cv_history",
+  meds: "intakeGroup.meds",
+};
+
+const COMPLETENESS_MSG_KEYS: Record<IntakeCompletenessLevel, TranslationKey> = {
+  strong: "intakeCompleteness.strong",
+  moderate: "intakeCompleteness.moderate",
+  limited: "intakeCompleteness.limited",
+};
+
 // ── Analyze narrative for signal presence ────────────────────────
 
-export function analyzeNarrativeSignals(text: string): IntakeSignalStatus[] {
+export function analyzeNarrativeSignals(text: string, t?: TFunc): IntakeSignalStatus[] {
   return INTAKE_SIGNALS.map((signal) => ({
     key: signal.key,
-    label: signal.label,
+    label: t && SIGNAL_LABEL_KEYS[signal.key] ? t(SIGNAL_LABEL_KEYS[signal.key]) : signal.label,
     group: signal.group,
     status: signal.patterns.some((p) => p.test(text)) ? "detected" : "unclear",
   }));
@@ -115,10 +152,10 @@ export function analyzeNarrativeSignals(text: string): IntakeSignalStatus[] {
 
 // ── Group signals by clinical category ──────────────────────────
 
-export function groupSignalStatuses(signals: IntakeSignalStatus[]): SignalGroup[] {
+export function groupSignalStatuses(signals: IntakeSignalStatus[], t?: TFunc): SignalGroup[] {
   return SIGNAL_GROUP_ORDER.map((g) => ({
     id: g.id,
-    label: g.label,
+    label: t ? t(GROUP_LABEL_KEYS[g.id]) : g.label,
     signals: signals.filter((s) => s.group === g.id),
   }));
 }
@@ -130,7 +167,6 @@ export function getConsiderAddingItems(
   max: number = 5,
 ): string[] {
   const unclear = signals.filter((s) => s.status === "unclear");
-  // Sort by consider priority descending (most clinically useful first)
   const withPriority = unclear.map((s) => {
     const def = INTAKE_SIGNALS.find((d) => d.key === s.key);
     return { label: s.label, priority: def?.considerPriority ?? 0 };
@@ -141,7 +177,7 @@ export function getConsiderAddingItems(
 
 // ── Compute intake completeness ─────────────────────────────────
 
-export function getIntakeCompleteness(signals: IntakeSignalStatus[]): IntakeCompleteness {
+export function getIntakeCompleteness(signals: IntakeSignalStatus[], t?: TFunc): IntakeCompleteness {
   const detectedCount = signals.filter((s) => s.status === "detected").length;
   const unclearCount = signals.length - detectedCount;
   const ratio = detectedCount / signals.length;
@@ -151,13 +187,13 @@ export function getIntakeCompleteness(signals: IntakeSignalStatus[]): IntakeComp
 
   if (ratio >= 0.7) {
     level = "strong";
-    message = "Key symptoms, red flags, vitals, and medication context appear present. Some items may still need confirmation.";
+    message = t ? t(COMPLETENESS_MSG_KEYS.strong) : "Key symptoms, red flags, vitals, and medication context appear present. Some items may still need confirmation.";
   } else if (ratio >= 0.4) {
     level = "moderate";
-    message = "Core symptoms are present, but additional context may improve extraction and review.";
+    message = t ? t(COMPLETENESS_MSG_KEYS.moderate) : "Core symptoms are present, but additional context may improve extraction and review.";
   } else {
     level = "limited";
-    message = "Consider adding duration, radiation, associated symptoms, vitals, cardiovascular history, or medications if available.";
+    message = t ? t(COMPLETENESS_MSG_KEYS.limited) : "Consider adding duration, radiation, associated symptoms, vitals, cardiovascular history, or medications if available.";
   }
 
   return { level, detectedCount, unclearCount, message };

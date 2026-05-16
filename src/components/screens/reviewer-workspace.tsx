@@ -25,6 +25,7 @@ import {
   updateQueueFeedback,
   getReviewerMetrics,
 } from "@/lib/cardio/reviewer-queue";
+import { getRouteLabel } from "@/lib/cardio/report-helpers";
 import {
   buildAuditRecord,
   downloadAuditRecordJson,
@@ -342,7 +343,7 @@ export function ReviewerWorkspace({
                         </td>
                         <td className="max-w-[220px] px-3 py-2.5 text-meta text-ink-secondary">{r.chief_complaint}</td>
                         <td className="px-3 py-2.5">
-                          <span className={cn("rounded-badge border px-2 py-0.5 font-mono text-eyebrow uppercase tracking-wide", getRouteBadgeCls(r.route))}>{r.route_label}</span>
+                          <span className={cn("rounded-badge border px-2 py-0.5 font-mono text-eyebrow uppercase tracking-wide", getRouteBadgeCls(r.route))}>{getRouteLabel(r.route, t)}</span>
                         </td>
                         <td className="px-3 py-2.5 text-center font-mono text-label">
                           <span className={r.safety_flags_count > 0 ? "text-emergency" : "text-muted"}>{r.safety_flags_count}</span>
@@ -388,7 +389,7 @@ export function ReviewerWorkspace({
               {/* Case detail */}
               <div className="mt-4 grid gap-3 rounded-lg border border-rule-light bg-surface/50 p-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_case")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.case_id}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.route_label}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{getRouteLabel(selectedQueueItem.route, t)}</p></div>
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_complaint")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.chief_complaint}</p></div>
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_flags")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.safety_flags_count}</p></div>
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_edits")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.human_edits_count}</p></div>
@@ -562,7 +563,7 @@ export function ReviewerWorkspace({
                         </td>
                         <td className="px-3 py-2.5">
                           <span className={cn("rounded-badge border px-2 py-0.5 font-mono text-eyebrow uppercase tracking-wide", getRouteBadgeCls(c.final_route))}>
-                            {c.final_route?.replace(/_/g, " ") ?? "—"}
+                            {c.final_route ? getRouteLabel(c.final_route, t) : "—"}
                           </span>
                         </td>
                         <td className="px-3 py-2.5 font-mono text-label capitalize text-ink-secondary">{c.current_status.replace(/_/g, " ")}</td>
@@ -591,7 +592,7 @@ export function ReviewerWorkspace({
                 </div>
                 <div className="mt-3 grid gap-3 rounded-lg border border-rule-light bg-surface/50 p-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_case")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.case_id}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedPersistedCase.final_route?.replace(/_/g, " ") ?? "—"}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedPersistedCase.final_route ? getRouteLabel(selectedPersistedCase.final_route, t) : "—"}</p></div>
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_decision_status")}</span><p className="mt-0.5 text-meta capitalize text-ink-secondary">{selectedPersistedCase.decision_status?.replace(/_/g, " ") ?? "—"}</p></div>
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_extraction_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.extraction_source ?? "—"}</p></div>
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_routing_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.routing_source ?? "—"}</p></div>

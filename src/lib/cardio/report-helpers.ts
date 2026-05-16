@@ -1,4 +1,7 @@
 import type { DecisionStatus, CardioReport, HumanCorrectionStatus } from "@/types";
+import type { TranslationKey } from "@/i18n/en";
+
+export type TFunc = (key: TranslationKey) => string;
 
 export type UrgencyLevel = "emergency" | "urgent" | "routine" | "info" | "deferred" | "unknown";
 
@@ -12,8 +15,13 @@ export function getUrgencyLevel(report: CardioReport): UrgencyLevel {
   return "unknown";
 }
 
-export function getRouteLabel(path: string | null): string {
-  if (!path) return "No route determined";
+export function getRouteLabel(path: string | null, t?: TFunc): string {
+  if (!path) return t ? t("routeLabel.none") : "No route determined";
+  if (t) {
+    const key = `routeLabel.${path}` as TranslationKey;
+    const translated = t(key);
+    if (translated !== key) return translated;
+  }
   const labels: Record<string, string> = {
     PATH_EMERGENCY_NOW: "Emergency — Immediate escalation",
     PATH_URGENT_SAME_DAY: "Urgent — Same-day review",
@@ -25,7 +33,12 @@ export function getRouteLabel(path: string | null): string {
   return labels[path] ?? path;
 }
 
-export function getStatusLabel(status: DecisionStatus): string {
+export function getStatusLabel(status: DecisionStatus, t?: TFunc): string {
+  if (t) {
+    const key = `statusLabel.${status}` as TranslationKey;
+    const translated = t(key);
+    if (translated !== key) return translated;
+  }
   const labels: Record<DecisionStatus, string> = {
     DECIDED: "Decided",
     NEEDS_MORE_INFO: "Needs more information",
@@ -68,9 +81,17 @@ export interface WhyNotItem {
   reason: string;
 }
 
-export function getWhyThisRoute(report: CardioReport): string {
+export function getWhyThisRoute(report: CardioReport, t?: TFunc): string {
   const u = getUrgencyLevel(report);
   const status = report.decision.status;
+  if (t) {
+    if (status === "NEEDS_MORE_INFO") return t("whyRoute.needs_info");
+    if (status === "CONFLICT") return t("whyRoute.conflict");
+    if (u === "emergency") return t("whyRoute.emergency");
+    if (u === "urgent") return t("whyRoute.urgent");
+    if (u === "routine") return t("whyRoute.routine");
+    return t("whyRoute.default");
+  }
   if (status === "NEEDS_MORE_INFO")
     return "Critical clinical inputs were missing, so deterministic routing was withheld.";
   if (status === "CONFLICT")
@@ -84,10 +105,32 @@ export function getWhyThisRoute(report: CardioReport): string {
   return "Route determined by deterministic Soficca policy evaluation.";
 }
 
-export function getWhyNotSelected(report: CardioReport): WhyNotItem[] {
+export function getWhyNotSelected(report: CardioReport, t?: TFunc): WhyNotItem[] {
   const u = getUrgencyLevel(report);
   const status = report.decision.status;
 
+  if (t) {
+    if (status === "NEEDS_MORE_INFO") return [
+      { route: t("whyNot.needs_info.route1"), reason: t("whyNot.needs_info.reason1") },
+      { route: t("whyNot.needs_info.route2"), reason: t("whyNot.needs_info.reason2") },
+    ];
+    if (status === "CONFLICT") return [
+      { route: t("whyNot.conflict.route1"), reason: t("whyNot.conflict.reason1") },
+    ];
+    if (u === "emergency") return [
+      { route: t("whyNot.emergency.route1"), reason: t("whyNot.emergency.reason1") },
+      { route: t("whyNot.emergency.route2"), reason: t("whyNot.emergency.reason2") },
+    ];
+    if (u === "urgent") return [
+      { route: t("whyNot.urgent.route1"), reason: t("whyNot.urgent.reason1") },
+      { route: t("whyNot.urgent.route2"), reason: t("whyNot.urgent.reason2") },
+    ];
+    if (u === "routine") return [
+      { route: t("whyNot.routine.route1"), reason: t("whyNot.routine.reason1") },
+      { route: t("whyNot.routine.route2"), reason: t("whyNot.routine.reason2") },
+    ];
+    return [];
+  }
   if (status === "NEEDS_MORE_INFO") return [
     { route: "Routine / Urgent", reason: "A safe route cannot be selected until required fields are complete." },
     { route: "Emergency", reason: "Emergency override was not triggered by safety policy." },
@@ -169,28 +212,52 @@ const EVIDENCE_LABELS: Record<string, string> = {
   current_meds_none: "Current cardiac meds",
 };
 
-function formatEvidenceValue(key: string, value: unknown): string {
+const EVIDENCE_LABEL_KEYS: Record<string, TranslationKey> = {
+  age: "evidence.age",
+  chest_pain_present: "evidence.chest_pain_present",
+  pain_duration_minutes: "evidence.pain_duration_minutes",
+  pain_character: "evidence.pain_character",
+  pain_severity: "evidence.pain_severity",
+  pain_radiation: "evidence.pain_radiation",
+  exertional_chest_pain: "evidence.exertional_chest_pain",
+  diaphoresis: "evidence.diaphoresis",
+  dyspnea: "evidence.dyspnea",
+  syncope: "evidence.syncope",
+  systolic_bp: "evidence.systolic_bp",
+  heart_rate: "evidence.heart_rate",
+  prior_mi: "evidence.prior_mi",
+  known_cad: "evidence.known_cad",
+  cv_risk_factors_count: "evidence.cv_risk_factors_count",
+  current_meds_none: "evidence.current_meds_none",
+};
+
+function getEvidenceLabel(key: string, t?: TFunc): string {
+  if (t && EVIDENCE_LABEL_KEYS[key]) return t(EVIDENCE_LABEL_KEYS[key]);
+  return EVIDENCE_LABELS[key] ?? key.replace(/_/g, " ");
+}
+
+function formatEvidenceValue(key: string, value: unknown, t?: TFunc): string {
   if (value === true) {
-    if (key === "current_meds_none") return "None reported";
-    return "Yes";
+    if (key === "current_meds_none") return t ? t("evidence.value_none_reported") : "None reported";
+    return t ? t("evidence.value_yes") : "Yes";
   }
   if (value === false) {
-    if (key === "current_meds_none") return "Taking medications";
-    return "No";
+    if (key === "current_meds_none") return t ? t("evidence.value_taking_meds") : "Taking medications";
+    return t ? t("evidence.value_no") : "No";
   }
   if (key === "pain_duration_minutes" && typeof value === "number") return `${value} min`;
   if (key === "pain_radiation" && typeof value === "string") return value.replace(/_/g, " ");
   return String(value);
 }
 
-export function getDecisiveInputs(report: CardioReport): string[] {
+export function getDecisiveInputs(report: CardioReport, t?: TFunc): string[] {
   const inputs: string[] = [];
   const ev = report.trace.evidence;
   for (const [key, val] of Object.entries(ev)) {
     if (INTERNAL_EVIDENCE_KEYS.has(key)) continue;
     if (val.value === null || val.value === undefined) continue;
-    const label = EVIDENCE_LABELS[key] ?? key.replace(/_/g, " ");
-    inputs.push(`${label}: ${formatEvidenceValue(key, val.value)}`);
+    const label = getEvidenceLabel(key, t);
+    inputs.push(`${label}: ${formatEvidenceValue(key, val.value, t)}`);
   }
   return inputs;
 }
@@ -198,6 +265,7 @@ export function getDecisiveInputs(report: CardioReport): string[] {
 export function getDecisiveInputsWithEdits(
   report: CardioReport,
   correction?: HumanCorrectionStatus | null,
+  t?: TFunc,
 ): { text: string; edited: boolean }[] {
   const editedFields = new Set<string>(
     correction?.diffs.map((d) => d.field as string) ?? []
@@ -207,23 +275,23 @@ export function getDecisiveInputsWithEdits(
   for (const [key, val] of Object.entries(ev)) {
     if (INTERNAL_EVIDENCE_KEYS.has(key)) continue;
     if (val.value === null || val.value === undefined) continue;
-    const label = EVIDENCE_LABELS[key] ?? key.replace(/_/g, " ");
+    const label = getEvidenceLabel(key, t);
     const isEdited = editedFields.has(key);
     inputs.push({
-      text: `${label}: ${formatEvidenceValue(key, val.value)}`,
+      text: `${label}: ${formatEvidenceValue(key, val.value, t)}`,
       edited: isEdited,
     });
   }
   return inputs;
 }
 
-export function getUnconfirmedInputs(report: CardioReport): string[] {
+export function getUnconfirmedInputs(report: CardioReport, t?: TFunc): string[] {
   const inputs: string[] = [];
   const ev = report.trace.evidence;
   for (const [key, val] of Object.entries(ev)) {
     if (INTERNAL_EVIDENCE_KEYS.has(key)) continue;
     if (val.value !== null && val.value !== undefined) continue;
-    const label = EVIDENCE_LABELS[key] ?? key.replace(/_/g, " ");
+    const label = getEvidenceLabel(key, t);
     inputs.push(label);
   }
   return inputs;

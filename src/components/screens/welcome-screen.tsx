@@ -1,35 +1,21 @@
 "use client";
 
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 
-const PIPELINE_STEPS = [
-  {
-    step: "01",
-    title: "Free-text symptoms",
-    description: "Physician enters a clinical narrative in natural language.",
-  },
-  {
-    step: "02",
-    title: "AI signal structuring",
-    description: "AI extracts clinical signals. It does not determine the route.",
-  },
-  {
-    step: "03",
-    title: "Soficca deterministic route",
-    description: "Governed safety policies and versioned rules determine the routing path.",
-  },
-  {
-    step: "04",
-    title: "Physician review",
-    description: "A physician reviews and confirms every routed case. Final authority is always human.",
-  },
+const PIPELINE_STEPS: { step: string; titleKey: TranslationKey; descKey: TranslationKey }[] = [
+  { step: "01", titleKey: "welcome.step1_title", descKey: "welcome.step1_desc" },
+  { step: "02", titleKey: "welcome.step2_title", descKey: "welcome.step2_desc" },
+  { step: "03", titleKey: "welcome.step3_title", descKey: "welcome.step3_desc" },
+  { step: "04", titleKey: "welcome.step4_title", descKey: "welcome.step4_desc" },
 ];
 
-const EVIDENCE_LOOP = [
-  { label: "Structured signals", icon: "◇" },
-  { label: "Versioned route", icon: "⬡" },
-  { label: "Human review", icon: "○" },
-  { label: "Operational signals", icon: "△" },
+const EVIDENCE_LOOP: { labelKey: TranslationKey; icon: string }[] = [
+  { labelKey: "welcome.evidence_signals", icon: "◇" },
+  { labelKey: "welcome.evidence_route", icon: "⬡" },
+  { labelKey: "welcome.evidence_review", icon: "○" },
+  { labelKey: "welcome.evidence_ops", icon: "△" },
 ];
 
 interface WelcomeScreenProps {
@@ -41,6 +27,8 @@ export function WelcomeScreen({
   onStartCase,
   onViewSampleReport,
 }: WelcomeScreenProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="px-6 py-14 md:px-12 lg:py-20">
       <div className="mx-auto max-w-[1360px]">
@@ -48,21 +36,21 @@ export function WelcomeScreen({
         <div className="grid gap-12 lg:grid-cols-[1fr_420px] lg:items-start lg:gap-20">
           {/* Left column — copy */}
           <div>
-            <Eyebrow>Cardiovascular Triage Infrastructure</Eyebrow>
+            <Eyebrow>{t("welcome.eyebrow")}</Eyebrow>
 
             <h1 className="mt-6 font-sans text-display-xl font-semibold tracking-tightest text-ink sm:text-[clamp(2.8rem,5vw,3.5rem)]">
-              Soficca{" "}
-              <span className="text-accent">Cardio Pilot</span>
+              {t("welcome.headline_soficca")}{" "}
+              <span className="text-accent">{t("welcome.headline_accent")}</span>
             </h1>
 
             <p className="mt-5 max-w-[480px] text-body-lg leading-relaxed text-ink-secondary">
-              Cardiovascular triage infrastructure built for physician review.
+              {t("welcome.subtitle")}
             </p>
 
             <p className="mt-8 max-w-[540px] text-body leading-[1.78] text-muted">
-              <span className="font-medium text-ink">AI structures the signal.</span>{" "}
-              <span className="font-medium text-accent">Soficca governs the route.</span>{" "}
-              <span className="font-medium text-ink">Physicians make the final decision.</span>
+              <span className="font-medium text-ink">{t("welcome.mantra_ai")}</span>{" "}
+              <span className="font-medium text-accent">{t("welcome.mantra_soficca")}</span>{" "}
+              <span className="font-medium text-ink">{t("welcome.mantra_physician")}</span>
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -70,23 +58,21 @@ export function WelcomeScreen({
                 onClick={onStartCase}
                 className="inline-flex h-11 items-center gap-2 rounded-btn bg-ink px-7 font-mono text-label font-medium uppercase text-warm-white shadow-btn transition-all hover:-translate-y-px hover:shadow-card-hover"
               >
-                Start Pilot Case →
+                {t("welcome.cta_start")}
               </button>
 
               <button
                 onClick={onViewSampleReport}
                 className="inline-flex h-11 items-center gap-2 rounded-btn border border-rule bg-warm-white px-6 font-mono text-label uppercase text-muted transition-all hover:border-ink/30 hover:text-ink"
               >
-                View sample report
+                {t("welcome.cta_sample")}
               </button>
             </div>
 
             {/* Disclaimer */}
             <div className="mt-16 border-t border-rule-light pt-5">
               <p className="max-w-[480px] text-caption leading-relaxed text-muted">
-                Soficca does not diagnose, prescribe, or replace clinical judgment.
-                This pilot structures symptoms and safety-routing signals for human
-                clinical review.
+                {t("welcome.disclaimer")}
               </p>
             </div>
           </div>
@@ -107,10 +93,10 @@ export function WelcomeScreen({
                   {/* Card */}
                   <div className="flex-1 rounded-card border border-rule-light/80 bg-warm-white p-5 shadow-card transition-shadow hover:shadow-card-hover">
                     <h3 className="font-sans text-body font-semibold text-ink">
-                      {step.title}
+                      {t(step.titleKey)}
                     </h3>
                     <p className="mt-1.5 text-caption leading-relaxed text-muted">
-                      {step.description}
+                      {t(step.descKey)}
                     </p>
                   </div>
                 </div>
@@ -122,17 +108,17 @@ export function WelcomeScreen({
         {/* Evidence loop — strategic authority dark section */}
         <div className="mt-16 rounded-card bg-authority p-7 shadow-authority ring-1 ring-white/[0.04] sm:p-8">
           <p className="mb-5 font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-authority-text/50">
-            Pilot evidence loop
+            {t("welcome.evidence_heading")}
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {EVIDENCE_LOOP.map((item) => (
               <div
-                key={item.label}
+                key={item.labelKey}
                 className="flex items-center gap-3 rounded-btn border border-white/[0.06] bg-authority-surface px-4 py-3.5"
               >
                 <span className="text-base text-authority-accent/70">{item.icon}</span>
                 <span className="font-sans text-body-sm font-medium text-authority-text">
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </div>
             ))}
@@ -141,10 +127,10 @@ export function WelcomeScreen({
 
         {/* Bottom meta tags */}
         <div className="mt-8 flex flex-wrap gap-8 font-mono text-eyebrow uppercase tracking-eyebrow text-muted/40">
-          <span>Deterministic</span>
-          <span>Auditable</span>
-          <span>Versionable</span>
-          <span>Safety-first</span>
+          <span>{t("welcome.tag_deterministic")}</span>
+          <span>{t("welcome.tag_auditable")}</span>
+          <span>{t("welcome.tag_versionable")}</span>
+          <span>{t("welcome.tag_safety")}</span>
         </div>
       </div>
     </section>

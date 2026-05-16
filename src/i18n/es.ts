@@ -693,6 +693,9 @@ const es: Partial<Record<TranslationKey, string>> = {
   "metrics.persist_summary_id": "ID del resumen",
   "metrics.persist_generated_at": "Generado el",
   "metrics.persist_disclaimer": "Resumen persistido cargado del backend. Solo casos simulados/anonimizados.",
+  "metrics.error_create_session": "Error inesperado al crear la sesión.",
+  "metrics.error_save_summary": "Error inesperado al guardar el resumen de sesión.",
+  "metrics.error_load_summary": "Error inesperado al cargar el resumen de sesión.",
 
   // Disclaimers
   "metrics.critical_wording": "Este panel no afirma mejoras en resultados clínicos. Muestra las señales operacionales que esta sesión de demostración produjo.",

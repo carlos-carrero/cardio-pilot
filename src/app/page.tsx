@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Header, type PilotSurface } from "@/components/layout/header";
+import { useTranslation, TranslationProvider } from "@/i18n";
 import { WelcomeScreen } from "@/components/screens/welcome-screen";
 import { IntakeScreen } from "@/components/screens/intake-screen";
 import { ExtractionPreviewScreen } from "@/components/screens/extraction-preview-screen";
@@ -34,6 +35,7 @@ import type {
 type FlowPhase = "welcome" | "intake" | "extracting" | "extraction" | "report" | "routing";
 
 export default function CardioPilotPage() {
+  const { t, lang } = useTranslation();
   const [surface, setSurface] = useState<PilotSurface>("flow");
   const [flowPhase, setFlowPhase] = useState<FlowPhase>("welcome");
   const [narrative, setNarrative] = useState("");
@@ -112,7 +114,7 @@ export default function CardioPilotPage() {
     setExtractionErrorType(null);
     setExtractionDiag(null);
 
-    const result = await callPilotExtract(text);
+    const result = await callPilotExtract(text, lang === "es" ? "es" : "auto");
 
     if (result.ok) {
       const d = result.data;
@@ -294,6 +296,7 @@ export default function CardioPilotPage() {
   }
 
   return (
+    <TranslationProvider>
     <div className="min-h-screen bg-paper">
       <Header
         activeSurface={surface}
@@ -321,7 +324,7 @@ export default function CardioPilotPage() {
                 <div className="inline-flex items-center gap-3 rounded-xl border border-rule-light bg-warm-white px-6 py-4">
                   <span className="h-3 w-3 animate-pulse rounded-full bg-accent" />
                   <span className="font-mono text-body-sm text-ink-secondary">
-                    Running AI signal extraction...
+                    {t("page.extracting")}
                   </span>
                 </div>
               </section>
@@ -335,17 +338,17 @@ export default function CardioPilotPage() {
                       <p className="text-body-sm text-urgent">
                         <span className="font-semibold">
                           {extractionErrorType === "timeout"
-                            ? "Live AI extraction timed out"
+                            ? t("page.extraction_timeout")
                             : extractionErrorType === "network" || extractionErrorType === "backend_unavailable"
-                              ? "Live AI extraction unavailable"
-                              : "Live AI extraction failed"}
+                              ? t("page.extraction_unavailable")
+                              : t("page.extraction_failed")}
                         </span>
-                        {" — showing mock fallback."}
+                        {" — "}{t("page.mock_fallback")}
                       </p>
                       <p className="mt-1 font-mono text-caption text-muted">
                         {extractionError}
                         {extractionDiag?.elapsedMs != null && ` · ${(extractionDiag.elapsedMs / 1000).toFixed(1)}s`}
-                        {extractionDiag?.retried && " · retried"}
+                        {extractionDiag?.retried && ` · ${t("page.retried")}`}
                         {extractionDiag?.requestId && ` · ${extractionDiag.requestId}`}
                       </p>
                       <button
@@ -353,7 +356,7 @@ export default function CardioPilotPage() {
                         onClick={handleRetryExtraction}
                         className="mt-2 rounded border border-urgent/40 bg-white px-3 py-1 font-mono text-caption text-urgent transition-colors hover:bg-urgent-soft/40"
                       >
-                        Retry live extraction
+                        {t("page.retry_extraction")}
                       </button>
                     </div>
                   </div>
@@ -371,7 +374,7 @@ export default function CardioPilotPage() {
                 <div className="inline-flex items-center gap-3 rounded-xl border border-rule-light bg-warm-white px-6 py-4">
                   <span className="h-3 w-3 animate-pulse rounded-full bg-accent" />
                   <span className="font-mono text-body-sm text-ink-secondary">
-                    Running Soficca deterministic routing...
+                    {t("page.routing")}
                   </span>
                 </div>
               </section>
@@ -383,7 +386,7 @@ export default function CardioPilotPage() {
                   <div className="mx-auto max-w-6xl px-6 pt-6">
                     <div className="rounded-lg border border-urgent/30 bg-urgent-soft/60 px-4 py-3">
                       <p className="text-body-sm text-urgent">
-                        <span className="font-semibold">Backend unavailable</span> — showing mock report fallback.
+                        <span className="font-semibold">{t("page.backend_unavailable")}</span> — {t("page.mock_report_fallback")}
                       </p>
                       <p className="mt-1 font-mono text-caption text-muted">{routingError}</p>
                     </div>
@@ -447,5 +450,6 @@ export default function CardioPilotPage() {
         )}
       </main>
     </div>
+    </TranslationProvider>
   );
 }
