@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { SectionLabel } from "@/components/ui/section-label";
 import { CardPanel } from "@/components/ui/card-panel";
 import { cn } from "@/lib/cn";
+import { useTranslation } from "@/i18n";
+import type { TranslationKey } from "@/i18n/en";
 import {
   reviewerCases as sampleCases,
   type ReviewerCase,
@@ -93,11 +95,11 @@ function getReviewBadgeCls(status: string): string {
 
 type FilterKey = "all" | "pending" | "reviewed" | "session";
 
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "session", label: "Session" },
-  { key: "pending", label: "Pending" },
-  { key: "reviewed", label: "Reviewed" },
+const FILTERS: { key: FilterKey; labelKey: TranslationKey }[] = [
+  { key: "all", labelKey: "reviewer.filter_all" },
+  { key: "session", labelKey: "reviewer.filter_session" },
+  { key: "pending", labelKey: "reviewer.filter_pending" },
+  { key: "reviewed", labelKey: "reviewer.filter_reviewed" },
 ];
 
 function OptionBtn({ selected, label, onClick }: { selected: boolean; label: string; onClick: () => void }) {
@@ -132,6 +134,7 @@ export function ReviewerWorkspace({
   onUpdateQueue,
   onOpenReport,
 }: ReviewerWorkspaceProps) {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showSamples, setShowSamples] = useState(false);
@@ -213,7 +216,7 @@ export function ReviewerWorkspace({
         if (!result.ok) setFeedbackPersistError(result.error);
       } catch {
         setFeedbackPersistStatus("error");
-        setFeedbackPersistError("Unexpected error persisting feedback.");
+        setFeedbackPersistError(t("reviewer.feedback_persist_unexpected_error"));
       }
     } else {
       setFeedbackPersistStatus("idle");
@@ -237,7 +240,7 @@ export function ReviewerWorkspace({
         setPersistedCasesError(result.error);
       }
     } catch {
-      setPersistedCasesError("Failed to load persisted cases.");
+      setPersistedCasesError(t("reviewer.persisted_load_failed"));
     } finally {
       setPersistedCasesLoading(false);
     }
@@ -273,18 +276,18 @@ export function ReviewerWorkspace({
       <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
         {/* ─── Main column ─── */}
         <div>
-          <SectionLabel>Physician Reviewer Workspace</SectionLabel>
+          <SectionLabel>{t("reviewer.section_label")}</SectionLabel>
           <h2 className="mt-3 font-sans text-heading-lg font-semibold text-ink">
-            Review routed cases
+            {t("reviewer.heading")}
           </h2>
           <p className="mt-2 max-w-[560px] text-body leading-relaxed text-ink-secondary">
-            Review routed cases, assess the suggested route, and submit structured feedback.
+            {t("reviewer.subtitle")}
           </p>
 
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-rule-light bg-surface px-3.5 py-2">
             <span className={cn("h-1.5 w-1.5 rounded-full", queue.some((q) => q.persisted) ? "bg-routine" : "bg-muted/50")} />
             <span className="font-mono text-label text-muted">
-              {queue.some((q) => q.persisted) ? "Reviewer feedback is persisted for saved cases." : "Local reviewer queue. Feedback is persisted for database-backed cases."}
+              {queue.some((q) => q.persisted) ? t("reviewer.persist_banner_saved") : t("reviewer.persist_banner_local")}
             </span>
           </div>
 
@@ -294,22 +297,22 @@ export function ReviewerWorkspace({
               <button key={f.key} onClick={() => setFilter(f.key)} className={cn(
                 "rounded-badge border px-3 py-1 font-mono text-label uppercase tracking-wide transition-all",
                 filter === f.key ? "border-ink/20 bg-ink text-warm-white font-medium" : "border-rule-light bg-warm-white text-muted hover:text-ink-secondary",
-              )}>{f.label}</button>
+              )}>{t(f.labelKey)}</button>
             ))}
             <span className="mx-1 h-3 w-px bg-rule-light" />
             <button
               onClick={() => setShowSamples(!showSamples)}
               className="rounded-badge border border-rule-light bg-warm-white px-3 py-1 font-mono text-label uppercase tracking-wide text-muted transition-all hover:text-ink-secondary"
             >
-              {showSamples ? "Hide samples" : "Show samples"}
+              {showSamples ? t("reviewer.hide_samples") : t("reviewer.show_samples")}
             </button>
           </div>
 
           {/* Empty state */}
           {visibleRows.length === 0 && (
             <div className="mt-8 rounded-card border border-rule-light bg-surface p-8 text-center">
-              <p className="text-body font-medium text-ink-secondary">No cases sent to reviewer yet.</p>
-              <p className="mt-1 text-body-sm text-muted">Run a pilot case and click &quot;Send to Reviewer&quot; from the final report.</p>
+              <p className="text-body font-medium text-ink-secondary">{t("reviewer.empty_heading")}</p>
+              <p className="mt-1 text-body-sm text-muted">{t("reviewer.empty_hint")}</p>
             </div>
           )}
 
@@ -319,13 +322,13 @@ export function ReviewerWorkspace({
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-rule-light/60 bg-surface/40">
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Case</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Complaint</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Route</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted text-center">Flags</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted text-center">Edits</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Status</th>
-                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Actions</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_case")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_complaint")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_route")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted text-center">{t("reviewer.col_flags")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted text-center">{t("reviewer.col_edits")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_status")}</th>
+                    <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -335,7 +338,7 @@ export function ReviewerWorkspace({
                       <tr key={r.case_id} className={cn("border-b border-rule-light/50 transition-colors", isSelected ? "bg-accent-soft/20" : "bg-warm-white hover:bg-surface/40")}>
                         <td className="px-3 py-2.5">
                           <span className="font-mono text-label text-ink-secondary">{r.case_id}</span>
-                          {r.isSession && <span className="ml-1.5 rounded-badge bg-accent-soft px-1.5 py-0.5 font-mono text-eyebrow text-accent">session</span>}
+                          {r.isSession && <span className="ml-1.5 rounded-badge bg-accent-soft px-1.5 py-0.5 font-mono text-eyebrow text-accent">{t("reviewer.badge_session")}</span>}
                         </td>
                         <td className="max-w-[220px] px-3 py-2.5 text-meta text-ink-secondary">{r.chief_complaint}</td>
                         <td className="px-3 py-2.5">
@@ -349,19 +352,19 @@ export function ReviewerWorkspace({
                         </td>
                         <td className="px-3 py-2.5">
                           <span className={cn("rounded-badge px-2 py-0.5 font-mono text-eyebrow uppercase tracking-wide", getReviewBadgeCls(r.review_status))}>
-                            {r.review_status === "reviewed" ? "Reviewed" : "Pending"}
+                            {r.review_status === "reviewed" ? t("reviewer.status_reviewed") : t("reviewer.status_pending")}
                           </span>
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="flex gap-1.5">
                             {r.isSession && (
                               <button onClick={() => selectCase(r.case_id)} className={cn("rounded-btn border px-2.5 py-1 font-mono text-eyebrow uppercase tracking-wide transition-all", isSelected ? "border-accent bg-accent text-white" : "border-accent/30 bg-accent-soft text-accent hover:bg-accent hover:text-white")}>
-                                Review
+                                {t("reviewer.action_review")}
                               </button>
                             )}
                             {!r.isSession && (
                               <button onClick={() => onOpenReport(r.case_id)} className="rounded-btn border border-rule bg-paper px-2.5 py-1 font-mono text-eyebrow uppercase tracking-wide text-ink-secondary transition-all hover:border-accent hover:text-accent">
-                                Report
+                                {t("reviewer.action_report")}
                               </button>
                             )}
                           </div>
@@ -378,26 +381,26 @@ export function ReviewerWorkspace({
           {selectedQueueItem && (
             <div className="mt-6 rounded-card border border-accent/15 bg-warm-white p-5 shadow-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
-                <SectionLabel>Case Review &amp; Feedback</SectionLabel>
-                <button onClick={() => { setSelectedId(null); clearForm(); }} className="font-mono text-label uppercase tracking-wide text-muted hover:text-ink">Close</button>
+                <SectionLabel>{t("reviewer.detail_label")}</SectionLabel>
+                <button onClick={() => { setSelectedId(null); clearForm(); }} className="font-mono text-label uppercase tracking-wide text-muted hover:text-ink">{t("reviewer.close")}</button>
               </div>
 
               {/* Case detail */}
               <div className="mt-4 grid gap-3 rounded-lg border border-rule-light bg-surface/50 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Case</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.case_id}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Route</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.route_label}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Chief complaint</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.chief_complaint}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Safety flags</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.safety_flags_count}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Human edits</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.human_edits_count}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Extraction</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.extraction_source}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Routing</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.routing_source}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">Review status</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedQueueItem.review_status.replace(/_/g, " ")}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_case")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.case_id}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.route_label}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_complaint")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.chief_complaint}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_flags")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.safety_flags_count}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_edits")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.human_edits_count}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_extraction")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.extraction_source}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_routing")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.routing_source}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_review_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedQueueItem.review_status.replace(/_/g, " ")}</p></div>
               </div>
 
               {/* AI summary if present */}
               {selectedQueueItem.pilotCase.extraction?.structured_clinical_summary && (
                 <div className="mt-3 rounded-lg border border-rule-light/60 bg-surface/40 p-3">
-                  <p className="mb-1 font-mono text-eyebrow font-medium uppercase text-muted">AI structured summary</p>
+                  <p className="mb-1 font-mono text-eyebrow font-medium uppercase text-muted">{t("reviewer.ai_summary")}</p>
                   <p className="text-meta leading-relaxed text-ink-secondary">{selectedQueueItem.pilotCase.extraction.structured_clinical_summary}</p>
                 </div>
               )}
@@ -408,70 +411,70 @@ export function ReviewerWorkspace({
                   onClick={() => handleAuditDownload("json")}
                   className="rounded-btn border border-rule bg-paper px-3 py-1.5 font-mono text-label uppercase tracking-wide text-ink-secondary transition-all hover:border-accent hover:text-accent"
                 >
-                  {auditDlState === "json" ? "Downloaded!" : "Export Audit JSON"}
+                  {auditDlState === "json" ? t("reviewer.export_downloaded") : t("reviewer.export_audit_json")}
                 </button>
                 <button
                   onClick={() => handleAuditDownload("md")}
                   className="rounded-btn border border-rule bg-paper px-3 py-1.5 font-mono text-label uppercase tracking-wide text-ink-secondary transition-all hover:border-accent hover:text-accent"
                 >
-                  {auditDlState === "md" ? "Downloaded!" : "Export Audit Markdown"}
+                  {auditDlState === "md" ? t("reviewer.export_downloaded") : t("reviewer.export_audit_md")}
                 </button>
               </div>
 
               {/* Feedback form */}
               <div className="mt-5 space-y-4">
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">1. Was the route appropriate?</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q1_heading")}</h4>
                   <div className="flex flex-wrap gap-2">
-                    <OptionBtn selected={routeOk === "agree"} label="Agree" onClick={() => setRouteOk("agree")} />
-                    <OptionBtn selected={routeOk === "partially_agree"} label="Partially agree" onClick={() => setRouteOk("partially_agree")} />
-                    <OptionBtn selected={routeOk === "disagree"} label="Disagree" onClick={() => setRouteOk("disagree")} />
+                    <OptionBtn selected={routeOk === "agree"} label={t("reviewer.q1_agree")} onClick={() => setRouteOk("agree")} />
+                    <OptionBtn selected={routeOk === "partially_agree"} label={t("reviewer.q1_partial")} onClick={() => setRouteOk("partially_agree")} />
+                    <OptionBtn selected={routeOk === "disagree"} label={t("reviewer.q1_disagree")} onClick={() => setRouteOk("disagree")} />
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">2. Was the report clinically useful?</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q2_heading")}</h4>
                   <div className="flex items-center gap-2">
                     {[1,2,3,4,5].map((v) => <ScaleBtn key={v} selected={usefulness===v} value={v} onClick={() => setUsefulness(v)} />)}
                     <span className="ml-2 font-mono text-label text-muted">{usefulness ? `${usefulness} / 5` : ""}</span>
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">3. Did Soficca surface important missing information?</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q3_heading")}</h4>
                   <div className="flex flex-wrap gap-2">
-                    <OptionBtn selected={missingSurfaced === "yes"} label="Yes" onClick={() => setMissingSurfaced("yes")} />
-                    <OptionBtn selected={missingSurfaced === "partially"} label="Partially" onClick={() => setMissingSurfaced("partially")} />
-                    <OptionBtn selected={missingSurfaced === "no"} label="No" onClick={() => setMissingSurfaced("no")} />
-                    <OptionBtn selected={missingSurfaced === "not_applicable"} label="Not applicable" onClick={() => setMissingSurfaced("not_applicable")} />
+                    <OptionBtn selected={missingSurfaced === "yes"} label={t("reviewer.q3_yes")} onClick={() => setMissingSurfaced("yes")} />
+                    <OptionBtn selected={missingSurfaced === "partially"} label={t("reviewer.q3_partial")} onClick={() => setMissingSurfaced("partially")} />
+                    <OptionBtn selected={missingSurfaced === "no"} label={t("reviewer.q3_no")} onClick={() => setMissingSurfaced("no")} />
+                    <OptionBtn selected={missingSurfaced === "not_applicable"} label={t("reviewer.q3_na")} onClick={() => setMissingSurfaced("not_applicable")} />
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">4. Were any safety flags wrong or missing?</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q4_heading")}</h4>
                   <div className="flex flex-wrap gap-2">
-                    <OptionBtn selected={flagIssue === "no"} label="No" onClick={() => setFlagIssue("no")} />
-                    <OptionBtn selected={flagIssue === "missing_flag"} label="Yes, missing flag" onClick={() => setFlagIssue("missing_flag")} />
-                    <OptionBtn selected={flagIssue === "incorrect_flag"} label="Yes, incorrect flag" onClick={() => setFlagIssue("incorrect_flag")} />
-                    <OptionBtn selected={flagIssue === "unsure"} label="Unsure" onClick={() => setFlagIssue("unsure")} />
+                    <OptionBtn selected={flagIssue === "no"} label={t("reviewer.q4_no")} onClick={() => setFlagIssue("no")} />
+                    <OptionBtn selected={flagIssue === "missing_flag"} label={t("reviewer.q4_missing")} onClick={() => setFlagIssue("missing_flag")} />
+                    <OptionBtn selected={flagIssue === "incorrect_flag"} label={t("reviewer.q4_incorrect")} onClick={() => setFlagIssue("incorrect_flag")} />
+                    <OptionBtn selected={flagIssue === "unsure"} label={t("reviewer.q4_unsure")} onClick={() => setFlagIssue("unsure")} />
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">5. Estimated review-time saved</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q5_heading")}</h4>
                   <div className="flex flex-wrap gap-2">
-                    <OptionBtn selected={timeSaved === "0_minutes"} label="0 minutes" onClick={() => setTimeSaved("0_minutes")} />
-                    <OptionBtn selected={timeSaved === "1_2_minutes"} label="1–2 minutes" onClick={() => setTimeSaved("1_2_minutes")} />
-                    <OptionBtn selected={timeSaved === "3_5_minutes"} label="3–5 minutes" onClick={() => setTimeSaved("3_5_minutes")} />
-                    <OptionBtn selected={timeSaved === "5_plus_minutes"} label="5+ minutes" onClick={() => setTimeSaved("5_plus_minutes")} />
+                    <OptionBtn selected={timeSaved === "0_minutes"} label={t("reviewer.q5_0")} onClick={() => setTimeSaved("0_minutes")} />
+                    <OptionBtn selected={timeSaved === "1_2_minutes"} label={t("reviewer.q5_1_2")} onClick={() => setTimeSaved("1_2_minutes")} />
+                    <OptionBtn selected={timeSaved === "3_5_minutes"} label={t("reviewer.q5_3_5")} onClick={() => setTimeSaved("3_5_minutes")} />
+                    <OptionBtn selected={timeSaved === "5_plus_minutes"} label={t("reviewer.q5_5_plus")} onClick={() => setTimeSaved("5_plus_minutes")} />
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">6. Would this be useful before consultation?</h4>
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q6_heading")}</h4>
                   <div className="flex flex-wrap gap-2">
-                    <OptionBtn selected={usefulBefore === "yes"} label="Yes" onClick={() => setUsefulBefore("yes")} />
-                    <OptionBtn selected={usefulBefore === "maybe"} label="Maybe" onClick={() => setUsefulBefore("maybe")} />
-                    <OptionBtn selected={usefulBefore === "no"} label="No" onClick={() => setUsefulBefore("no")} />
+                    <OptionBtn selected={usefulBefore === "yes"} label={t("reviewer.q6_yes")} onClick={() => setUsefulBefore("yes")} />
+                    <OptionBtn selected={usefulBefore === "maybe"} label={t("reviewer.q6_maybe")} onClick={() => setUsefulBefore("maybe")} />
+                    <OptionBtn selected={usefulBefore === "no"} label={t("reviewer.q6_no")} onClick={() => setUsefulBefore("no")} />
                   </div>
                 </CardPanel>
 
-                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">7. Reviewer comments</h4>
-                  <textarea value={comments} onChange={(e) => setComments(e.target.value)} placeholder="Add clinical notes, disagreement rationale, or missing context." className="min-h-[90px] w-full resize-y rounded-lg border border-rule bg-white p-3 font-sans text-body-sm leading-relaxed text-ink placeholder:text-muted/40 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20" />
+                <CardPanel><h4 className="mb-2 font-mono text-label font-medium uppercase tracking-label text-ink-secondary">{t("reviewer.q7_heading")}</h4>
+                  <textarea value={comments} onChange={(e) => setComments(e.target.value)} placeholder={t("reviewer.q7_placeholder")} className="min-h-[90px] w-full resize-y rounded-lg border border-rule bg-white p-3 font-sans text-body-sm leading-relaxed text-ink placeholder:text-muted/40 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20" />
                 </CardPanel>
               </div>
 
@@ -482,34 +485,34 @@ export function ReviewerWorkspace({
                   disabled={!routeOk}
                   className="inline-flex h-11 items-center gap-2 rounded-btn bg-ink px-5 font-mono text-label font-medium uppercase text-warm-white shadow-btn transition-all hover:-translate-y-px hover:shadow-card-hover disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Submit feedback
+                  {t("reviewer.submit")}
                 </button>
-                <button onClick={clearForm} className="inline-flex h-11 items-center rounded-btn border border-rule bg-warm-white px-4 font-mono text-label uppercase text-ink-secondary transition-all hover:border-accent/40 hover:text-ink">Clear form</button>
+                <button onClick={clearForm} className="inline-flex h-11 items-center rounded-btn border border-rule bg-warm-white px-4 font-mono text-label uppercase text-ink-secondary transition-all hover:border-accent/40 hover:text-ink">{t("reviewer.clear_form")}</button>
               </div>
 
               {saved && feedbackPersistStatus === "idle" && !selectedQueueItem?.persisted && (
                 <div className="mt-4 rounded-lg border border-accent/20 bg-accent-soft/50 px-4 py-3">
-                  <p className="text-body-sm font-medium text-accent">Feedback captured locally.</p>
-                  <p className="mt-0.5 text-caption text-muted">Save case to database before persisted review.</p>
-                  <p className="mt-1 text-caption text-muted">Physicians remain the final clinical decision-makers. Soficca does not diagnose, prescribe, or replace clinical judgment.</p>
+                  <p className="text-body-sm font-medium text-accent">{t("reviewer.saved_local")}</p>
+                  <p className="mt-0.5 text-caption text-muted">{t("reviewer.saved_local_hint")}</p>
+                  <p className="mt-1 text-caption text-muted">{t("reviewer.governance_disclaimer")}</p>
                 </div>
               )}
               {saved && feedbackPersistStatus === "saving" && (
                 <div className="mt-4 rounded-lg border border-accent/20 bg-accent-soft/50 px-4 py-3">
-                  <p className="text-body-sm font-medium text-accent">Saving reviewer feedback...</p>
+                  <p className="text-body-sm font-medium text-accent">{t("reviewer.saving_feedback")}</p>
                 </div>
               )}
               {saved && feedbackPersistStatus === "saved" && (
                 <div className="mt-4 rounded-lg border border-routine/20 bg-routine/5 px-4 py-3">
-                  <p className="text-body-sm font-medium text-routine">Reviewer feedback saved to database.</p>
-                  <p className="mt-1 text-caption text-muted">Physicians remain the final clinical decision-makers. Soficca does not diagnose, prescribe, or replace clinical judgment.</p>
+                  <p className="text-body-sm font-medium text-routine">{t("reviewer.saved_db")}</p>
+                  <p className="mt-1 text-caption text-muted">{t("reviewer.governance_disclaimer")}</p>
                 </div>
               )}
               {saved && (feedbackPersistStatus === "error" || feedbackPersistStatus === "unavailable") && (
                 <div className="mt-4 rounded-lg border border-urgent/20 bg-urgent-soft/50 px-4 py-3">
-                  <p className="text-body-sm font-medium text-urgent">Database save failed — feedback retained locally.</p>
+                  <p className="text-body-sm font-medium text-urgent">{t("reviewer.saved_error")}</p>
                   {feedbackPersistError && <p className="mt-0.5 text-caption text-urgent/70">{feedbackPersistError}</p>}
-                  <p className="mt-1 text-caption text-muted">Physicians remain the final clinical decision-makers. Soficca does not diagnose, prescribe, or replace clinical judgment.</p>
+                  <p className="mt-1 text-caption text-muted">{t("reviewer.governance_disclaimer")}</p>
                 </div>
               )}
             </div>
@@ -518,7 +521,7 @@ export function ReviewerWorkspace({
           {/* ─── Persisted cases section ─── */}
           <div className="mt-8">
             <div className="flex items-center gap-3">
-              <SectionLabel>Persisted Cases</SectionLabel>
+              <SectionLabel>{t("reviewer.persisted_label")}</SectionLabel>
               <button
                 onClick={handleLoadPersistedCases}
                 disabled={persistedCasesLoading}
@@ -529,25 +532,25 @@ export function ReviewerWorkspace({
                     : "border-accent/30 bg-paper text-accent hover:bg-accent hover:text-white"
                 )}
               >
-                {persistedCasesLoading ? "Loading..." : persistedCasesLoaded ? "Refresh" : "Load Persisted Cases"}
+                {persistedCasesLoading ? t("reviewer.persisted_loading") : persistedCasesLoaded ? t("reviewer.persisted_refresh") : t("reviewer.persisted_load")}
               </button>
             </div>
             {persistedCasesError && (
               <p className="mt-2 text-body-sm text-urgent">{persistedCasesError}</p>
             )}
             {persistedCasesLoaded && persistedCases.length === 0 && !persistedCasesError && (
-              <p className="mt-3 text-body-sm text-muted">No additional persisted cases found. Cases already in local queue are excluded.</p>
+              <p className="mt-3 text-body-sm text-muted">{t("reviewer.persisted_empty")}</p>
             )}
             {persistedCases.length > 0 && (
               <div className="mt-3 overflow-x-auto rounded-card border border-rule-light/80">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-rule-light/60 bg-surface/40">
-                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Case</th>
-                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Route</th>
-                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Status</th>
-                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Source</th>
-                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">Actions</th>
+                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_case")}</th>
+                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_route")}</th>
+                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_status")}</th>
+                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.persisted_col_source")}</th>
+                      <th className="px-3 py-2.5 font-mono text-eyebrow font-medium uppercase tracking-label text-muted">{t("reviewer.col_actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -555,7 +558,7 @@ export function ReviewerWorkspace({
                       <tr key={c.case_id} className={cn("border-b border-rule-light/50 transition-colors", selectedPersistedCase?.case_id === c.case_id ? "bg-accent-soft/20" : "bg-warm-white hover:bg-surface/40")}>
                         <td className="px-3 py-2.5">
                           <span className="font-mono text-label text-ink-secondary">{c.case_id}</span>
-                          <span className="ml-1.5 rounded-badge bg-routine/10 px-1.5 py-0.5 font-mono text-eyebrow text-routine">persisted</span>
+                          <span className="ml-1.5 rounded-badge bg-routine/10 px-1.5 py-0.5 font-mono text-eyebrow text-routine">{t("reviewer.badge_persisted")}</span>
                         </td>
                         <td className="px-3 py-2.5">
                           <span className={cn("rounded-badge border px-2 py-0.5 font-mono text-eyebrow uppercase tracking-wide", getRouteBadgeCls(c.final_route))}>
@@ -571,7 +574,7 @@ export function ReviewerWorkspace({
                               selectedPersistedCase?.case_id === c.case_id ? "border-accent bg-accent text-white" : "border-accent/30 bg-accent-soft text-accent hover:bg-accent hover:text-white"
                             )}
                           >
-                            Details
+                            {t("reviewer.action_details")}
                           </button>
                         </td>
                       </tr>
@@ -583,31 +586,31 @@ export function ReviewerWorkspace({
             {selectedPersistedCase && (
               <div className="mt-4 rounded-card border border-accent/15 bg-warm-white p-5 shadow-card">
                 <div className="flex items-center justify-between gap-4">
-                  <SectionLabel>Persisted Case Detail</SectionLabel>
-                  <button onClick={() => { setSelectedPersistedCase(null); setPersistedBundleDetail(null); }} className="font-mono text-label uppercase tracking-wide text-muted hover:text-ink">Close</button>
+                  <SectionLabel>{t("reviewer.persisted_detail_label")}</SectionLabel>
+                  <button onClick={() => { setSelectedPersistedCase(null); setPersistedBundleDetail(null); }} className="font-mono text-label uppercase tracking-wide text-muted hover:text-ink">{t("reviewer.close")}</button>
                 </div>
                 <div className="mt-3 grid gap-3 rounded-lg border border-rule-light bg-surface/50 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Case</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.case_id}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Route</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedPersistedCase.final_route?.replace(/_/g, " ") ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Decision status</span><p className="mt-0.5 text-meta capitalize text-ink-secondary">{selectedPersistedCase.decision_status?.replace(/_/g, " ") ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Extraction source</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.extraction_source ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Routing source</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.routing_source ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">Status</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedPersistedCase.current_status.replace(/_/g, " ")}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_case")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.case_id}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedPersistedCase.final_route?.replace(/_/g, " ") ?? "—"}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_decision_status")}</span><p className="mt-0.5 text-meta capitalize text-ink-secondary">{selectedPersistedCase.decision_status?.replace(/_/g, " ") ?? "—"}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_extraction_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.extraction_source ?? "—"}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_routing_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.routing_source ?? "—"}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.col_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedPersistedCase.current_status.replace(/_/g, " ")}</p></div>
                 </div>
                 {selectedPersistedCase.chief_complaint_summary && (
                   <div className="mt-3 rounded-lg border border-rule-light/60 bg-surface/40 p-3">
-                    <p className="mb-1 font-mono text-eyebrow font-medium uppercase text-muted">Chief complaint summary</p>
+                    <p className="mb-1 font-mono text-eyebrow font-medium uppercase text-muted">{t("reviewer.persisted_complaint_summary")}</p>
                     <p className="text-meta leading-relaxed text-ink-secondary">{selectedPersistedCase.chief_complaint_summary}</p>
                   </div>
                 )}
                 {persistedBundleDetail && (
                   <div className="mt-3 space-y-1.5 text-meta">
-                    <div className="flex justify-between"><span className="text-muted">Reviewer feedback count</span><span className="font-mono text-ink-secondary">{Array.isArray((persistedBundleDetail as Record<string, unknown>).reviewer_feedback) ? ((persistedBundleDetail as Record<string, unknown>).reviewer_feedback as unknown[]).length : 0}</span></div>
-                    <div className="flex justify-between"><span className="text-muted">Audit record</span><span className="font-mono text-ink-secondary">{(persistedBundleDetail as Record<string, unknown>).audit_record ? "Available" : "—"}</span></div>
-                    <div className="flex justify-between"><span className="text-muted">Engine report</span><span className="font-mono text-ink-secondary">{(persistedBundleDetail as Record<string, unknown>).engine_report ? "Available" : "—"}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("reviewer.persisted_feedback_count")}</span><span className="font-mono text-ink-secondary">{Array.isArray((persistedBundleDetail as Record<string, unknown>).reviewer_feedback) ? ((persistedBundleDetail as Record<string, unknown>).reviewer_feedback as unknown[]).length : 0}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("reviewer.persisted_audit_record")}</span><span className="font-mono text-ink-secondary">{(persistedBundleDetail as Record<string, unknown>).audit_record ? t("reviewer.persisted_available") : "—"}</span></div>
+                    <div className="flex justify-between"><span className="text-muted">{t("reviewer.persisted_engine_report")}</span><span className="font-mono text-ink-secondary">{(persistedBundleDetail as Record<string, unknown>).engine_report ? t("reviewer.persisted_available") : "—"}</span></div>
                   </div>
                 )}
-                <p className="mt-3 text-eyebrow text-muted">Persisted bundle loaded from backend. Not counted in current session metrics unless added through the current reviewer queue.</p>
+                <p className="mt-3 text-eyebrow text-muted">{t("reviewer.persisted_disclaimer")}</p>
               </div>
             )}
           </div>
@@ -617,43 +620,43 @@ export function ReviewerWorkspace({
         <aside className="space-y-4 lg:sticky lg:top-header lg:self-start">
           <div className="rounded-card border border-rule-light/80 bg-warm-white p-5 shadow-card">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Reviewer metrics
+              {t("reviewer.metrics_heading")}
             </p>
             <div className="mt-3 space-y-2 text-meta">
-              <MetricRow label="Session cases" value={String(metrics.total_in_queue)} />
-              <MetricRow label="Pending review" value={String(metrics.pending_review)} warn={metrics.pending_review > 0} />
-              <MetricRow label="Reviewed" value={String(metrics.reviewed)} highlight={metrics.reviewed > 0} />
-              <MetricRow label="Agreement rate" value={metrics.agreement_rate !== null ? `${(metrics.agreement_rate * 100).toFixed(0)}%` : "—"} highlight={metrics.agreement_rate !== null && metrics.agreement_rate >= 0.8} />
-              <MetricRow label="Avg usefulness" value={metrics.average_usefulness !== null ? `${metrics.average_usefulness.toFixed(1)} / 5` : "—"} />
-              <MetricRow label="Avg time saved" value={metrics.average_time_saved ?? "—"} />
+              <MetricRow label={t("reviewer.metric_session_cases")} value={String(metrics.total_in_queue)} />
+              <MetricRow label={t("reviewer.metric_pending")} value={String(metrics.pending_review)} warn={metrics.pending_review > 0} />
+              <MetricRow label={t("reviewer.metric_reviewed")} value={String(metrics.reviewed)} highlight={metrics.reviewed > 0} />
+              <MetricRow label={t("reviewer.metric_agreement")} value={metrics.agreement_rate !== null ? `${(metrics.agreement_rate * 100).toFixed(0)}%` : "—"} highlight={metrics.agreement_rate !== null && metrics.agreement_rate >= 0.8} />
+              <MetricRow label={t("reviewer.metric_usefulness")} value={metrics.average_usefulness !== null ? `${metrics.average_usefulness.toFixed(1)} / 5` : "—"} />
+              <MetricRow label={t("reviewer.metric_time_saved")} value={metrics.average_time_saved ?? "—"} />
               <div className="border-t border-rule-light pt-2">
-                <MetricRow label="Emergency reviewed" value={String(metrics.emergency_routes_reviewed)} />
-                <MetricRow label="With human edits" value={String(metrics.cases_with_human_edits)} />
-                <MetricRow label="Audit exports available" value={String(metrics.audit_exports_available)} />
+                <MetricRow label={t("reviewer.metric_emergency")} value={String(metrics.emergency_routes_reviewed)} />
+                <MetricRow label={t("reviewer.metric_human_edits")} value={String(metrics.cases_with_human_edits)} />
+                <MetricRow label={t("reviewer.metric_audit_exports")} value={String(metrics.audit_exports_available)} />
               </div>
             </div>
             <p className="mt-3 border-t border-rule-light pt-2 text-eyebrow text-muted">
-              Current session metrics only. Sample cases and separately loaded persisted cases are not counted.
+              {t("reviewer.metrics_disclaimer")}
             </p>
           </div>
 
           {!hasQueue && (
             <div className="rounded-card border border-rule-light/80 bg-warm-white p-5 shadow-card">
               <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-                Getting started
+                {t("reviewer.getting_started")}
               </p>
               <p className="mt-2 text-meta leading-relaxed text-muted">
-                Run a pilot case through the full flow, then click &quot;Send to Reviewer&quot; in the final report to populate this queue.
+                {t("reviewer.getting_started_hint")}
               </p>
             </div>
           )}
 
           <div className="rounded-card border border-rule-light/80 bg-warm-white p-5 shadow-card">
             <p className="font-mono text-eyebrow font-medium uppercase tracking-eyebrow text-muted">
-              Governance
+              {t("reviewer.governance_heading")}
             </p>
             <p className="mt-2 text-caption leading-relaxed text-muted">
-              Physicians remain the final clinical decision-makers. Soficca does not diagnose, prescribe, or replace clinical judgment.
+              {t("reviewer.governance_disclaimer")}
             </p>
           </div>
         </aside>
