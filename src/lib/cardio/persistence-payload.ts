@@ -14,6 +14,7 @@ import type {
   EngineReportPayload,
   AuditRecordPayload,
 } from "@/types";
+import type { Language } from "@/i18n";
 import { buildAuditRecord, buildAuditRecordMarkdown } from "./audit-record";
 
 // ── Main builder ────────────────────────────────────────────────
@@ -21,6 +22,7 @@ import { buildAuditRecord, buildAuditRecordMarkdown } from "./audit-record";
 export function buildPersistCaseBundlePayload(
   pilotCase: PilotCase,
   sessionId?: string | null,
+  locale?: Language,
 ): PersistCaseBundlePayload {
   const ext = pilotCase.extraction;
   const report = pilotCase.engine_report;
@@ -43,6 +45,8 @@ export function buildPersistCaseBundlePayload(
     metadata_json: {
       created_at: pilotCase.created_at,
       report_source: pilotCase.report_source ?? "unknown",
+      ui_locale: locale ?? "en",
+      source_language: locale ?? "en",
     },
   };
 
