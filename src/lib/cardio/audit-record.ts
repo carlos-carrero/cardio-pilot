@@ -1,3 +1,30 @@
+/**
+ * Audit record builder + JSON / Markdown download helpers.
+ *
+ * ── Audit language policy ───────────────────────────────────────
+ * Visible UI in the application is localized through the i18n
+ * system (EN / ES). Audit records produced by this module are
+ * INTENTIONALLY NOT localized:
+ *
+ *   - UI labels are localized at render time via `t()`.
+ *   - Audit records preserve canonical backend contract values
+ *     and English / institutional labels so that the audit trail
+ *     remains stable, comparable, and machine-readable regardless
+ *     of which language the operating clinician selected.
+ *   - Canonical identifiers such as `PATH_*`, `RULE_*`, status
+ *     codes, `policy_version`, `model_id`, signal-chain entries,
+ *     safety assertions, and every JSON key must remain unchanged
+ *     across languages.
+ *   - The audit Markdown export remains single-language for now to
+ *     avoid mixing localized display labels with audit artifacts
+ *     that are consumed by physicians, regulators, and downstream
+ *     machine pipelines.
+ *
+ * A localized clinician-facing report export (e.g. a localized PDF
+ * summary) can be introduced later as a separate, additional
+ * artifact. It must not replace this canonical audit surface.
+ */
+
 import type {
   PilotCase,
   CardioPilotAuditRecord,

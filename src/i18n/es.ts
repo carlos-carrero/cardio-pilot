@@ -468,6 +468,14 @@ const es: Partial<Record<TranslationKey, string>> = {
   "report.persist_unexpected_error": "Error inesperado al guardar el caso.",
   "report.persist_connection_error": "Error de conexión.",
 
+  // Shared persistence client error banners (UI mapping for stable errorCodes)
+  "persist.error_case_persistence_unavailable": "Persistencia no disponible — la sesión actual se conserva en el navegador.",
+  "persist.error_case_backend_unavailable": "Backend no disponible — la sesión actual se conserva en el navegador.",
+  "persist.error_feedback_persistence_unavailable": "Persistencia no disponible — la retroalimentación se conserva en la sesión actual.",
+  "persist.error_feedback_backend_unavailable": "Backend no disponible — la retroalimentación se conserva en la sesión actual.",
+  "persist.error_session_backend_unavailable": "Backend no disponible — no se creó la sesión.",
+  "persist.error_network": "Error de conexión.",
+
   // ── Reviewer Workspace ────────────────────────────────────────────
   "reviewer.section_label": "Espacio de revisión médica",
   "reviewer.heading": "Revisar casos clasificados",
@@ -514,7 +522,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   "reviewer.detail_extraction": "Extracción",
   "reviewer.detail_routing": "Clasificación",
   "reviewer.detail_review_status": "Estado de revisión",
-  "reviewer.ai_summary": "Resumen estructurado IA",
+  "reviewer.ai_summary": "Resumen clínico estructurado por IA",
 
   // Audit export
   "reviewer.export_downloaded": "¡Descargado!",
@@ -559,6 +567,18 @@ const es: Partial<Record<TranslationKey, string>> = {
   "reviewer.saved_error": "Error al guardar en base de datos — retroalimentación retenida localmente.",
   "reviewer.feedback_persist_unexpected_error": "Error inesperado al persistir la retroalimentación.",
   "reviewer.persisted_load_failed": "No se pudieron cargar los casos persistidos.",
+
+  // Persisted-case enum display labels (UI-only mapping; canonical values unchanged)
+  "reviewer.review_status_pending_review": "Revisión pendiente",
+  "reviewer.review_status_reviewed": "Revisado",
+  "reviewer.review_status_pending": "Pendiente",
+  "reviewer.review_status_needs_review": "Requiere revisión",
+  "reviewer.source_ai": "IA",
+  "reviewer.source_mock": "Simulado",
+  "reviewer.source_backend": "Backend",
+  "reviewer.source_mock_fallback": "Respaldo simulado",
+  "reviewer.source_browser_session": "Sesión del navegador",
+  "reviewer.source_unknown": "Desconocido",
   "reviewer.governance_disclaimer": "Los médicos son los responsables finales de las decisiones clínicas. Soficca no diagnostica, no prescribe ni reemplaza el juicio clínico.",
 
   // Persisted cases

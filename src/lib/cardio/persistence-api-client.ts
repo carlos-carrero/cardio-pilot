@@ -22,40 +22,79 @@ import type {
   PersistedSessionSummaryResponse,
   SessionPersistenceStatus,
 } from "@/types";
+import type { TranslationKey } from "@/i18n/en";
+
+// ── Stable error codes (UI-side localization map) ───────────────
+// `error` (raw string) is preserved as a diagnostic detail. `errorCode`
+// is an optional, stable, UI-side discriminator for localized banners.
+// No backend payload or API route is affected by these codes.
+
+export type PersistErrorCode =
+  | "case_persistence_unavailable"
+  | "case_backend_unavailable"
+  | "feedback_persistence_unavailable"
+  | "feedback_backend_unavailable"
+  | "session_backend_unavailable"
+  | "network";
+
+const PERSIST_ERROR_CODE_KEYS: Record<PersistErrorCode, TranslationKey> = {
+  case_persistence_unavailable: "persist.error_case_persistence_unavailable",
+  case_backend_unavailable: "persist.error_case_backend_unavailable",
+  feedback_persistence_unavailable: "persist.error_feedback_persistence_unavailable",
+  feedback_backend_unavailable: "persist.error_feedback_backend_unavailable",
+  session_backend_unavailable: "persist.error_session_backend_unavailable",
+  network: "persist.error_network",
+};
+
+/**
+ * Resolve a localized banner string for a persistence client result.
+ * Falls back to the raw backend `error` (diagnostic) if no `errorCode`
+ * is set or the code is unknown.
+ */
+export function localizePersistError(
+  result: { error: string; errorCode?: PersistErrorCode },
+  t: (key: TranslationKey) => string,
+): string {
+  if (result.errorCode) {
+    const key = PERSIST_ERROR_CODE_KEYS[result.errorCode];
+    if (key) return t(key);
+  }
+  return result.error;
+}
 
 // ── Result types ────────────────────────────────────────────────
 
 export type PersistResult =
   | { ok: true; data: PersistCaseBundleResponse; status: "saved" }
-  | { ok: false; error: string; status: PersistenceStatus };
+  | { ok: false; error: string; errorCode?: PersistErrorCode; status: PersistenceStatus };
 
 export type ReadBundleResult =
   | { ok: true; data: PersistedCaseBundle }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorCode?: PersistErrorCode };
 
 export type ReviewerFeedbackResult =
   | { ok: true; data: PersistReviewerFeedbackResponse; status: "saved" }
-  | { ok: false; error: string; status: ReviewerPersistenceStatus };
+  | { ok: false; error: string; errorCode?: PersistErrorCode; status: ReviewerPersistenceStatus };
 
 export type CaseListResult =
   | { ok: true; data: PersistedCaseListResponse }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorCode?: PersistErrorCode };
 
 export type CreateSessionResult =
   | { ok: true; data: CreatePilotSessionResponse; status: "created" }
-  | { ok: false; error: string; status: SessionPersistenceStatus };
+  | { ok: false; error: string; errorCode?: PersistErrorCode; status: SessionPersistenceStatus };
 
 export type SessionListResult =
   | { ok: true; data: SessionListResponse }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorCode?: PersistErrorCode };
 
 export type SaveSummaryResult =
   | { ok: true; data: PersistSessionSummaryResponse }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorCode?: PersistErrorCode };
 
 export type GetSummaryResult =
   | { ok: true; data: PersistedSessionSummaryResponse }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorCode?: PersistErrorCode };
 
 // ── Persist case bundle ─────────────────────────────────────────
 
@@ -79,11 +118,11 @@ export async function persistCaseBundle(
     }
 
     if (res.status === 503) {
-      return { ok: false, error: "Persistence unavailable — current session retained in browser.", status: "unavailable" };
+      return { ok: false, error: "Persistence unavailable — current session retained in browser.", errorCode: "case_persistence_unavailable", status: "unavailable" };
     }
 
     if (res.status === 502) {
-      return { ok: false, error: "Backend unavailable — current session retained in browser.", status: "unavailable" };
+      return { ok: false, error: "Backend unavailable — current session retained in browser.", errorCode: "case_backend_unavailable", status: "unavailable" };
     }
 
     const errData = await res.json().catch(() => ({}));
@@ -91,7 +130,7 @@ export async function persistCaseBundle(
     return { ok: false, error: String(detail), status: "error" };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Network error";
-    return { ok: false, error: msg, status: "unavailable" };
+    return { ok: false, error: msg, errorCode: "network", status: "unavailable" };
   }
 }
 
@@ -141,11 +180,11 @@ export async function saveReviewerFeedback(
     }
 
     if (res.status === 503) {
-      return { ok: false, error: "Persistence unavailable — feedback retained in current session.", status: "unavailable" };
+      return { ok: false, error: "Persistence unavailable — feedback retained in current session.", errorCode: "feedback_persistence_unavailable", status: "unavailable" };
     }
 
     if (res.status === 502) {
-      return { ok: false, error: "Backend unavailable — feedback retained in current session.", status: "unavailable" };
+      return { ok: false, error: "Backend unavailable — feedback retained in current session.", errorCode: "feedback_backend_unavailable", status: "unavailable" };
     }
 
     const errData = await res.json().catch(() => ({}));
@@ -153,7 +192,7 @@ export async function saveReviewerFeedback(
     return { ok: false, error: String(detail), status: "error" };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Network error";
-    return { ok: false, error: msg, status: "unavailable" };
+    return { ok: false, error: msg, errorCode: "network", status: "unavailable" };
   }
 }
 
@@ -205,14 +244,14 @@ export async function createPilotSession(
     }
 
     if (res.status === 502 || res.status === 503) {
-      return { ok: false, error: "Backend unavailable — session not created.", status: "unavailable" };
+      return { ok: false, error: "Backend unavailable — session not created.", errorCode: "session_backend_unavailable", status: "unavailable" };
     }
 
     const errData = await res.json().catch(() => ({}));
     return { ok: false, error: errData.detail ?? `HTTP ${res.status}`, status: "error" };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Network error";
-    return { ok: false, error: msg, status: "unavailable" };
+    return { ok: false, error: msg, errorCode: "network", status: "unavailable" };
   }
 }
 

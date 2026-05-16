@@ -7,9 +7,11 @@
 
 import type { ReviewerFeedback } from "@/types";
 import type { PersistReviewerFeedbackPayload } from "@/types";
+import type { Language } from "@/i18n";
 
 export function buildReviewerFeedbackPayload(
   feedback: ReviewerFeedback,
+  locale?: Language,
 ): PersistReviewerFeedbackPayload {
   return {
     reviewer_name: null,
@@ -21,5 +23,6 @@ export function buildReviewerFeedbackPayload(
     estimated_review_time_saved: feedback.estimated_time_saved ?? null,
     useful_before_consultation: feedback.useful_before_consultation ?? null,
     comments: feedback.comments || null,
+    ui_locale: locale ?? "en",
   };
 }

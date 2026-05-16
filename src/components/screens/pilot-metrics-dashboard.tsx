@@ -11,7 +11,7 @@ import {
   downloadSessionSummaryJson,
   downloadSessionSummaryMarkdown,
 } from "@/lib/cardio/session-export";
-import { createPilotSession, saveSessionSummary, getSessionSummary } from "@/lib/cardio/persistence-api-client";
+import { createPilotSession, saveSessionSummary, getSessionSummary, localizePersistError } from "@/lib/cardio/persistence-api-client";
 import { buildPersistSessionSummaryPayload } from "@/lib/cardio/session-summary-persistence";
 import type { PilotCase, ReviewerQueueItem, SessionMetrics, SessionPersistenceStatus } from "@/types";
 
@@ -51,7 +51,7 @@ export function PilotMetricsDashboard({
   persistedSessionId, persistedSessionStatus, persistedSessionLabel, persistedSessionError,
   onSetPersistedSessionId, onSetPersistedSessionStatus, onSetPersistedSessionLabel, onSetPersistedSessionError,
 }: PilotMetricsDashboardProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [summarySaveStatus, setSummarySaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [summarySaveError, setSummarySaveError] = useState<string | null>(null);
   const [summaryLoadStatus, setSummaryLoadStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
@@ -75,7 +75,7 @@ export function PilotMetricsDashboard({
         onSetPersistedSessionStatus("created");
       } else {
         onSetPersistedSessionStatus(result.status);
-        onSetPersistedSessionError(result.error);
+        onSetPersistedSessionError(localizePersistError(result, t));
       }
     } catch {
       onSetPersistedSessionStatus("error");
@@ -88,10 +88,10 @@ export function PilotMetricsDashboard({
     setSummarySaveStatus("saving");
     setSummarySaveError(null);
     try {
-      const payload = buildPersistSessionSummaryPayload(completedCases, reviewerQueue, metrics);
+      const payload = buildPersistSessionSummaryPayload(completedCases, reviewerQueue, metrics, lang);
       const result = await saveSessionSummary(persistedSessionId, payload);
       setSummarySaveStatus(result.ok ? "saved" : "error");
-      if (!result.ok) setSummarySaveError(result.error);
+      if (!result.ok) setSummarySaveError(localizePersistError(result, t));
     } catch {
       setSummarySaveStatus("error");
       setSummarySaveError(t("metrics.error_save_summary"));
@@ -110,7 +110,7 @@ export function PilotMetricsDashboard({
         setSummaryLoadStatus("loaded");
       } else {
         setSummaryLoadStatus("error");
-        setSummaryLoadError(result.error);
+        setSummaryLoadError(localizePersistError(result, t));
       }
     } catch {
       setSummaryLoadStatus("error");

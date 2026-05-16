@@ -128,6 +128,7 @@ export interface PersistReviewerFeedbackPayload {
   estimated_review_time_saved?: string | null;
   useful_before_consultation?: string | null;
   comments?: string | null;
+  ui_locale?: "en" | "es";
 }
 
 export interface PersistReviewerFeedbackResponse {
@@ -198,6 +199,7 @@ export interface PersistSessionSummaryPayload {
   governance_metrics_json?: Record<string, unknown> | null;
   safety_assertions_json?: Record<string, unknown> | null;
   case_summaries_json?: unknown[] | null;
+  ui_locale?: "en" | "es";
 }
 
 export interface PersistSessionSummaryResponse {

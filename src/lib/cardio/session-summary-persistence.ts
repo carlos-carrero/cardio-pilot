@@ -7,12 +7,14 @@
 
 import type { PilotCase, ReviewerQueueItem, SessionMetrics } from "@/types";
 import type { PersistSessionSummaryPayload } from "@/types";
+import type { Language } from "@/i18n";
 import { buildSessionSummary } from "./session-export";
 
 export function buildPersistSessionSummaryPayload(
   completedCases: PilotCase[],
   reviewerQueue: ReviewerQueueItem[],
   metrics: SessionMetrics,
+  locale?: Language,
 ): PersistSessionSummaryPayload {
   const summary = buildSessionSummary(completedCases, reviewerQueue, metrics);
 
@@ -25,5 +27,6 @@ export function buildPersistSessionSummaryPayload(
     governance_metrics_json: summary.governance_metrics as unknown as Record<string, unknown>,
     safety_assertions_json: summary.safety_assertions as unknown as Record<string, unknown>,
     case_summaries_json: summary.case_summaries as unknown[],
+    ui_locale: locale ?? "en",
   };
 }

@@ -1,3 +1,28 @@
+/**
+ * Case export helpers (JSON / Markdown).
+ *
+ * ── Export language policy ──────────────────────────────────────
+ * Visible UI labels in the application are localized through the i18n
+ * system (EN / ES). The exports produced by this module are
+ * INTENTIONALLY NOT localized:
+ *
+ *   - UI labels are localized via `useTranslation()` and `t()`.
+ *   - Raw audit/export outputs preserve canonical backend contract
+ *     values and English / institutional labels.
+ *   - Canonical values such as `PATH_*`, `RULE_*`, status codes,
+ *     policy_version, model_id, and all JSON keys must remain
+ *     unchanged across languages so that downstream audit, log,
+ *     analytics, and regulatory tooling can rely on stable
+ *     identifiers.
+ *   - Markdown exports remain single-language for now to avoid
+ *     mixing localized display labels with audit artifacts that
+ *     are consumed by reviewers, regulators, and machine pipelines.
+ *
+ * A localized clinician-facing PDF / report export can be added
+ * later as a separate feature; it must not replace this canonical
+ * export surface.
+ */
+
 import type { PilotCase } from "@/types";
 import { getRouteLabel, getStatusLabel } from "./report-helpers";
 

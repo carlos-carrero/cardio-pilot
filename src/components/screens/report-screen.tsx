@@ -30,7 +30,7 @@ import {
   downloadAuditRecordJson,
   downloadAuditRecordMarkdown,
 } from "@/lib/cardio/audit-record";
-import { persistCaseBundle } from "@/lib/cardio/persistence-api-client";
+import { persistCaseBundle, localizePersistError } from "@/lib/cardio/persistence-api-client";
 import { buildPersistCaseBundlePayload } from "@/lib/cardio/persistence-payload";
 import type { PersistenceStatus } from "@/types";
 
@@ -174,7 +174,7 @@ export function ReportScreen({ pilotCase, onNewCase, onSendToReviewer, isInRevie
       const payload = buildPersistCaseBundlePayload(pilotCase, persistedSessionId, lang);
       const result = await persistCaseBundle(payload);
       setPersistStatus(result.ok ? "saved" : result.status);
-      if (!result.ok) setPersistError(result.error);
+      if (!result.ok) setPersistError(localizePersistError(result, t));
     } catch {
       setPersistStatus("error");
       setPersistError(t("report.persist_unexpected_error"));

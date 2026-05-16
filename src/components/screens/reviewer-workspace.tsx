@@ -31,7 +31,7 @@ import {
   downloadAuditRecordJson,
   downloadAuditRecordMarkdown,
 } from "@/lib/cardio/audit-record";
-import { saveReviewerFeedback, listPersistedCases, getPersistedCase } from "@/lib/cardio/persistence-api-client";
+import { saveReviewerFeedback, listPersistedCases, getPersistedCase, localizePersistError } from "@/lib/cardio/persistence-api-client";
 import { buildReviewerFeedbackPayload } from "@/lib/cardio/reviewer-persistence";
 
 // ── Shared row type for table rendering ─────────────────────────
@@ -135,7 +135,7 @@ export function ReviewerWorkspace({
   onUpdateQueue,
   onOpenReport,
 }: ReviewerWorkspaceProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [filter, setFilter] = useState<FilterKey>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showSamples, setShowSamples] = useState(false);
@@ -158,6 +158,26 @@ export function ReviewerWorkspace({
   const [persistedCasesLoaded, setPersistedCasesLoaded] = useState(false);
   const [selectedPersistedCase, setSelectedPersistedCase] = useState<PersistedReviewerCaseSummary | null>(null);
   const [persistedBundleDetail, setPersistedBundleDetail] = useState<Record<string, unknown> | null>(null);
+
+  // ── Local display mappers (UI-only; do not mutate stored canonical values) ──
+  function locReviewStatus(status: string | null | undefined): string {
+    if (!status) return "—";
+    const key = `reviewer.review_status_${status}` as TranslationKey;
+    const v = t(key);
+    return v !== key ? v : status.replace(/_/g, " ");
+  }
+  function locDecisionStatus(status: string | null | undefined): string {
+    if (!status) return "—";
+    const key = `statusLabel.${status}` as TranslationKey;
+    const v = t(key);
+    return v !== key ? v : status.replace(/_/g, " ");
+  }
+  function locSource(value: string | null | undefined): string {
+    if (!value) return "—";
+    const key = `reviewer.source_${value}` as TranslationKey;
+    const v = t(key);
+    return v !== key ? v : value;
+  }
 
   const metrics = useMemo(() => getReviewerMetrics(queue), [queue]);
 
@@ -211,10 +231,10 @@ export function ReviewerWorkspace({
       setFeedbackPersistStatus("saving");
       setFeedbackPersistError(null);
       try {
-        const payload = buildReviewerFeedbackPayload(feedback);
+        const payload = buildReviewerFeedbackPayload(feedback, lang);
         const result = await saveReviewerFeedback(selectedId, payload);
         setFeedbackPersistStatus(result.ok ? "saved" : result.status);
-        if (!result.ok) setFeedbackPersistError(result.error);
+        if (!result.ok) setFeedbackPersistError(localizePersistError(result, t));
       } catch {
         setFeedbackPersistStatus("error");
         setFeedbackPersistError(t("reviewer.feedback_persist_unexpected_error"));
@@ -238,7 +258,7 @@ export function ReviewerWorkspace({
         setPersistedCases(filtered);
         setPersistedCasesLoaded(true);
       } else {
-        setPersistedCasesError(result.error);
+        setPersistedCasesError(localizePersistError(result, t));
       }
     } catch {
       setPersistedCasesError(t("reviewer.persisted_load_failed"));
@@ -393,9 +413,9 @@ export function ReviewerWorkspace({
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_complaint")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedQueueItem.chief_complaint}</p></div>
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_flags")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.safety_flags_count}</p></div>
                 <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_edits")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.human_edits_count}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_extraction")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.extraction_source}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_routing")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedQueueItem.routing_source}</p></div>
-                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_review_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedQueueItem.review_status.replace(/_/g, " ")}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_extraction")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{locSource(selectedQueueItem.extraction_source)}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_routing")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{locSource(selectedQueueItem.routing_source)}</p></div>
+                <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_review_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{locReviewStatus(selectedQueueItem.review_status)}</p></div>
               </div>
 
               {/* AI summary if present */}
@@ -566,8 +586,8 @@ export function ReviewerWorkspace({
                             {c.final_route ? getRouteLabel(c.final_route, t) : "—"}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-label capitalize text-ink-secondary">{c.current_status.replace(/_/g, " ")}</td>
-                        <td className="px-3 py-2.5 font-mono text-label text-muted">{c.extraction_source ?? "—"} / {c.routing_source ?? "—"}</td>
+                        <td className="px-3 py-2.5 font-mono text-label capitalize text-ink-secondary">{locReviewStatus(c.current_status)}</td>
+                        <td className="px-3 py-2.5 font-mono text-label text-muted">{locSource(c.extraction_source)} / {locSource(c.routing_source)}</td>
                         <td className="px-3 py-2.5">
                           <button
                             onClick={() => handleSelectPersistedCase(c)}
@@ -593,10 +613,10 @@ export function ReviewerWorkspace({
                 <div className="mt-3 grid gap-3 rounded-lg border border-rule-light bg-surface/50 p-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_case")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.case_id}</p></div>
                   <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.detail_route")}</span><p className="mt-0.5 text-meta text-ink-secondary">{selectedPersistedCase.final_route ? getRouteLabel(selectedPersistedCase.final_route, t) : "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_decision_status")}</span><p className="mt-0.5 text-meta capitalize text-ink-secondary">{selectedPersistedCase.decision_status?.replace(/_/g, " ") ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_extraction_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.extraction_source ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_routing_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{selectedPersistedCase.routing_source ?? "—"}</p></div>
-                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.col_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{selectedPersistedCase.current_status.replace(/_/g, " ")}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_decision_status")}</span><p className="mt-0.5 text-meta capitalize text-ink-secondary">{locDecisionStatus(selectedPersistedCase.decision_status)}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_extraction_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{locSource(selectedPersistedCase.extraction_source)}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.persisted_routing_source")}</span><p className="mt-0.5 font-mono text-meta text-ink-secondary">{locSource(selectedPersistedCase.routing_source)}</p></div>
+                  <div><span className="font-mono text-eyebrow uppercase text-muted">{t("reviewer.col_status")}</span><p className="mt-0.5 font-mono text-meta capitalize text-ink-secondary">{locReviewStatus(selectedPersistedCase.current_status)}</p></div>
                 </div>
                 {selectedPersistedCase.chief_complaint_summary && (
                   <div className="mt-3 rounded-lg border border-rule-light/60 bg-surface/40 p-3">

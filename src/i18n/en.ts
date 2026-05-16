@@ -465,6 +465,14 @@ const en = {
   "report.persist_unexpected_error": "Unexpected error saving case.",
   "report.persist_connection_error": "Connection error.",
 
+  // Shared persistence client error banners (UI mapping for stable errorCodes)
+  "persist.error_case_persistence_unavailable": "Persistence unavailable — current session retained in browser.",
+  "persist.error_case_backend_unavailable": "Backend unavailable — current session retained in browser.",
+  "persist.error_feedback_persistence_unavailable": "Persistence unavailable — feedback retained in current session.",
+  "persist.error_feedback_backend_unavailable": "Backend unavailable — feedback retained in current session.",
+  "persist.error_session_backend_unavailable": "Backend unavailable — session not created.",
+  "persist.error_network": "Network error.",
+
   // ── Reviewer Workspace ────────────────────────────────────────────
   "reviewer.section_label": "Physician Reviewer Workspace",
   "reviewer.heading": "Review routed cases",
@@ -556,6 +564,18 @@ const en = {
   "reviewer.saved_error": "Database save failed — feedback retained locally.",
   "reviewer.feedback_persist_unexpected_error": "Unexpected error persisting feedback.",
   "reviewer.persisted_load_failed": "Failed to load persisted cases.",
+
+  // Persisted-case enum display labels (UI-only mapping; canonical values unchanged)
+  "reviewer.review_status_pending_review": "Pending review",
+  "reviewer.review_status_reviewed": "Reviewed",
+  "reviewer.review_status_pending": "Pending",
+  "reviewer.review_status_needs_review": "Needs review",
+  "reviewer.source_ai": "AI",
+  "reviewer.source_mock": "Mock",
+  "reviewer.source_backend": "Backend",
+  "reviewer.source_mock_fallback": "Mock fallback",
+  "reviewer.source_browser_session": "Browser session",
+  "reviewer.source_unknown": "Unknown",
   "reviewer.governance_disclaimer": "Physicians remain the final clinical decision-makers. Soficca does not diagnose, prescribe, or replace clinical judgment.",
 
   // Persisted cases

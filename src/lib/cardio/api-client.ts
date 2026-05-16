@@ -69,8 +69,17 @@ function classifyFetchError(err: unknown): ExtractionErrorType {
 export async function callPilotExtract(
   caseText: string,
   language: string = "auto",
+  uiLocale?: "en" | "es",
 ): Promise<ExtractionResult> {
-  const body = { case_text: caseText, language, source: "free_text" };
+  // ui_locale and source_language are additive metadata for the backend.
+  // The backend may ignore unknown fields. Canonical extraction schema is unaffected.
+  const body = {
+    case_text: caseText,
+    language,
+    source: "free_text",
+    ui_locale: uiLocale ?? (language === "es" ? "es" : "en"),
+    source_language: language,
+  };
 
   async function attempt(): Promise<{
     res?: Response;
