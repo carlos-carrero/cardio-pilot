@@ -69,17 +69,12 @@ function classifyFetchError(err: unknown): ExtractionErrorType {
 export async function callPilotExtract(
   caseText: string,
   language: string = "auto",
-  uiLocale?: "en" | "es",
 ): Promise<ExtractionResult> {
-  // ui_locale and source_language are additive metadata for the backend.
-  // The backend may ignore unknown fields. Canonical extraction schema is unaffected.
-  const body = {
-    case_text: caseText,
-    language,
-    source: "free_text",
-    ui_locale: uiLocale ?? (language === "es" ? "es" : "en"),
-    source_language: language,
-  };
+  // The current FastAPI extraction endpoint uses a strict schema and rejects
+  // extra request fields. Only the fields the backend currently accepts are
+  // sent here. Locale metadata is carried on persistence payloads instead
+  // (case bundle, reviewer feedback, session summary) — not on this request.
+  const body = { case_text: caseText, language, source: "free_text" };
 
   async function attempt(): Promise<{
     res?: Response;

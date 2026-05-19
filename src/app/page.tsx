@@ -114,7 +114,7 @@ export default function CardioPilotPage() {
     setExtractionErrorType(null);
     setExtractionDiag(null);
 
-    const result = await callPilotExtract(text, lang === "es" ? "es" : "auto", lang);
+    const result = await callPilotExtract(text, lang === "es" ? "es" : "auto");
 
     if (result.ok) {
       const d = result.data;
